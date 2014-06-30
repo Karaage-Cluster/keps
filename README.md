@@ -1,4 +1,0 @@
-keps
-====
-
-Karaage Enhancement Proposals
