@@ -1,0 +1,41 @@
+KEP 2: Python 3
+===============
+
+:Created: 2014-06-30
+:Author: Brian May
+:Status: Draft
+
+
+Overview
+--------
+Support Python 2 and Python 3.
+
+Rationale
+---------
+Python 2.7 is in bug fix mode, and not being further developed. We need
+to support Python 3 if we want ensure Karaage remains relevant.
+
+Implementation
+--------------
+Beforce we can start, we need to ensure that there are Debian python3 packages
+of all the relevant libraries.
+
+* python3-django: waiting in Debian NEW queue.
+
+* python3-django-south: Will be included in Django 1.7, which will be released
+  soon.
+
+* python3-tldap: Waiting for python3-django.
+* python3-alogger
+
+* python3-ajax-select
+* python3-django-captcha
+* python3-django-celery
+* python3-django-jsonfield
+* python3-django-model-utils
+* python3-django-xmlrpc
+* python3-flup
+* python3-matplotlib
+* python3-mysqldb
+
+There might be other dependancies that have been missed.

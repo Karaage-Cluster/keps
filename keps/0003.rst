@@ -1,0 +1,34 @@
+KEP 3: Authorization
+====================
+
+:Created: 2014-06-30
+:Author: Brian May
+:Status: Draft
+
+
+Overview
+--------
+Support fine grained authorization.
+
+Rationale
+---------
+Karaage 2.7 used the Django authorization system, that allowed fine grained
+permissions for every user. This was a mess, with many permissions and no way
+for administrator's to determine which permissions were implemented, and which
+permissions did what.
+
+This was removed in Karaage 3 when the django.contrib.auth db models where
+replaced with custom db models that considerably decreased the complexities of
+the previous db model.
+
+Since then however, several Karaage administrators have expressed the need to
+have a fine grained authorization system, and this needs to be reintroduced in
+a clean manner.
+
+Implementation
+--------------
+
+.. todo:
+
+   We need to work out what the use cases are for fine grained systems, and
+   what rights need to be controlled with fine grained permissions.
