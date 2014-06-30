@@ -114,6 +114,10 @@ Beyond that, a KEP should include the following sections:
 * Implementation. A technical description of how this feature will
   be implemented. This may or may not include code snippets.
 
+The KEP should consider if any changes are required to the `Karage-SRS
+<https://readthedocs.org/builds/karaage-srs/>`_, which lists the
+Karaage specifications.
+
 All KEPs will be considered licensed under terms and conditions of GPL3+, the
 same license in use by Karaage itself.
 
