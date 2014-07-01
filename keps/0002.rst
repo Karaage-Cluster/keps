@@ -20,14 +20,9 @@ Implementation
 Beforce we can start, we need to ensure that there are Debian python3 packages
 of all the relevant libraries.
 
-* python3-django: waiting in Debian NEW queue.
-
 * python3-django-south: Will be included in Django 1.7, which will be released
   soon.
-
-* python3-tldap: Waiting for python3-django.
 * python3-alogger
-
 * python3-ajax-select
 * python3-django-captcha
 * python3-django-celery
@@ -39,3 +34,20 @@ of all the relevant libraries.
 * python3-mysqldb
 
 There might be other dependancies that have been missed.
+
+For each package, we need to:
+
+* All required libraries have also been updated.
+* Ensure code is compatable with Python 2.7, Python 3.2 and Python 3.4.
+* Debian packages for python3.
+* All tests run without failure.
+
+Done
+----
+The following packages already support Python3 in Debian:
+
+* python3-django
+* python3-tldap
+
+This list may be incomplete.
+
