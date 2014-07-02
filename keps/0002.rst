@@ -24,11 +24,9 @@ of all the relevant libraries.
   soon.
 * python3-alogger
 * python3-ajax-select
-* python3-django-captcha
 * python3-django-celery
-* python3-django-jsonfield
+* python3-django-jsonfield - see http://bugs.debian.org/753462
 * python3-django-model-utils
-* python3-django-xmlrpc
 * python3-flup
 * python3-matplotlib
 * python3-mysqldb
@@ -48,6 +46,9 @@ The following packages already support Python3 in Debian:
 
 * python3-django
 * python3-tldap
+* python3-django-xmlrpc
+* python3-pil (required by python3-django-captcha).
+* python3-django-captcha
 
 This list may be incomplete.
 
