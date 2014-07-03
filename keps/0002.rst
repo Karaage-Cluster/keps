@@ -29,7 +29,7 @@ of all the relevant libraries.
 * python3-matplotlib
 * python3-mysqldb
 * python3-django-pipeline (http://bugs.debian.org/753556)
-* python3-factory-boy (required for tests)
+* python3-factory-boy (http://bugs.debian.org/753558)
 
 There might be other dependancies that have been missed.
 
@@ -47,10 +47,10 @@ Debian New
 Fixed versions of the following packages are waiting in Debian new queue
 for manual processing.
 
-* python3-tldap
-* python3-django-xmlrpc
+* python3-tldap (http://bugs.debian.org/753482)
+* python3-django-xmlrpc (http://bugs.debian.org/753481)
 * python3-django-captcha
-* python3-django-jsonfield
+* python3-django-jsonfield (http://bugs.debian.org/753462)
 * python3-django-tables2
 * python3-django-filters
 * python3-django-model-utils
