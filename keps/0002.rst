@@ -29,6 +29,7 @@ of all the relevant libraries.
 * python3-matplotlib
 * python3-mysqldb
 * python3-django-pipeline (http://bugs.debian.org/753556)
+* python3-factory-boy (required for tests)
 
 There might be other dependancies that have been missed.
 
