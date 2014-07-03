@@ -25,7 +25,6 @@ of all the relevant libraries.
 * python3-alogger
 * python3-celery (http://bugs.debian.org/753555)
 * python3-django-celery (requires python3-celery)
-* python3-django-model-utils
 * python3-flup
 * python3-matplotlib
 * python3-mysqldb
@@ -53,6 +52,7 @@ for manual processing.
 * python3-django-jsonfield
 * python3-django-tables2
 * python3-django-filters
+* python3-django-model-utils
 
 Done
 ----
