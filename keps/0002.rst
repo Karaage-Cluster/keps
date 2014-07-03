@@ -59,7 +59,7 @@ Done
 ----
 The following packages already support Python3 in Debian:
 
-* python3-django
+* python3-django (http://bugs.debian.org/753556).
 * python3-pil (required by python3-django-captcha).
 * python3-ajax-select
 
