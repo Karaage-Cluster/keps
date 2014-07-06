@@ -20,58 +20,62 @@ Implementation
 Beforce we can start, we need to ensure that there are Debian python3 packages
 of all the relevant libraries.
 
-* python3-alogger
-* python3-celery [`Debian bug <http://bugs.debian.org/753555>`_]
-* python3-django-celery (requires python3-celery)
-* python3-flup (`upstream dead <http://www.saddi.com/software/flup/>`_?)
-* python3-mysqldb (`upstream dead <http://mysql-python.sourceforge.net/>`_?)
+*  python3-alogger
+*  python3-celery [`Debian bug <http://bugs.debian.org/753555>`_]
+*  python3-django-celery (requires python3-celery)
+*  python3-flup (`upstream dead <http://www.saddi.com/software/flup/>`_?)
+*  python3-mysqldb (`upstream dead <http://mysql-python.sourceforge.net/>`_?)
 
 There might be other dependancies that have been missed.
 
 For each package, we need to:
 
-* All required libraries have also been updated.
-* Ensure code is compatable with Python 2.7, Python 3.2 and Python 3.4.
-* Debian packages for python3.
-* All tests run without failure.
-* All packages except for alogger to be included in Debian/sid, and hopefully
-  Debian/jessie.
-* Package should be available on code.vpac.org, wheezy and sid.
+*  All required libraries have also been updated.
+*  Ensure code is compatable with Python 2.7, Python 3.2 and Python 3.4.
+*  Debian packages for python3.
+*  All tests run without failure.
+*  All packages except for alogger to be included in Debian/sid, and hopefully
+   Debian/jessie.
+*  Package should be available on code.vpac.org, wheezy and sid.
 
 Needs upstream update
 ---------------------
-* python3-django-jsonfield
-  * Latest release in Debian new with patch
-    [`Debian bug <http://bugs.debian.org/753462>`_]
-  * `Upstream bug report
-    <https://bitbucket.org/schinckel/django-jsonfield/issue/32/new-release-and-python3-support>`_.
-* python3-tldap
-  * Latest release in Debian new [`ITP <http://bugs.debian.org/753482>`_]
-  * Some minor changes implemented in git required for Karaage.
-* python3-django-south: Will be included in Django 1.7, which will be released
-  soon.
+*  python3-django-jsonfield
+
+   *  Latest release in Debian new with patch
+      [`Debian bug <http://bugs.debian.org/753462>`_]
+   *  `Upstream bug report
+      <https://bitbucket.org/schinckel/django-jsonfield/issue/32/new-release-and-python3-support>`_.
+
+*  python3-tldap
+
+   *  Latest release in Debian new [`ITP <http://bugs.debian.org/753482>`_]
+   *  Some minor changes implemented in git required for Karaage.
+
+*  python3-django-south: Will be included in Django 1.7, which will be released
+   soon.
 
 Debian New
 ----------
 Fixed versions of the following packages are waiting in Debian new queue
 for manual processing.
 
-* python3-django-captcha
-* python3-django-model-utils
-* python3-django-pipeline [`Debian bug <http://bugs.debian.org/753556>`_]
+*  python3-django-captcha
+*  python3-django-model-utils
+*  python3-django-pipeline [`Debian bug <http://bugs.debian.org/753556>`_]
 
 Done
 ----
 The following packages are complete:
 
-* python-numpydoc (required by python3-matplotlib build)
-* python3-django [`Debian bug <http://bugs.debian.org/753556>`_].
-* python3-pil (required by python3-django-captcha).
-* python3-ajax-select
-* python3-django-xmlrpc [`ITP <http://bugs.debian.org/753481>`_]
-* python3-factory-boy [`Debian bug <http://bugs.debian.org/753558>`_]
-* python3-matplotlib
-* python3-django-tables2
-* python3-django-filters
+*  python-numpydoc (required by python3-matplotlib build)
+*  python3-django [`Debian bug <http://bugs.debian.org/753556>`_].
+*  python3-pil (required by python3-django-captcha).
+*  python3-ajax-select
+*  python3-django-xmlrpc [`ITP <http://bugs.debian.org/753481>`_]
+*  python3-factory-boy [`Debian bug <http://bugs.debian.org/753558>`_]
+*  python3-matplotlib
+*  python3-django-tables2
+*  python3-django-filters
 
 This list may be incomplete.
