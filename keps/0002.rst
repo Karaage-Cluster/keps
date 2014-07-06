@@ -20,16 +20,11 @@ Implementation
 Beforce we can start, we need to ensure that there are Debian python3 packages
 of all the relevant libraries.
 
-* python3-django-south: Will be included in Django 1.7, which will be released
-  soon.
 * python3-alogger
 * python3-celery (http://bugs.debian.org/753555)
 * python3-django-celery (requires python3-celery)
 * python3-flup
-* python3-matplotlib
 * python3-mysqldb
-* python3-django-pipeline (http://bugs.debian.org/753556)
-* python3-factory-boy (http://bugs.debian.org/753558)
 
 There might be other dependancies that have been missed.
 
@@ -41,27 +36,36 @@ For each package, we need to:
 * All tests run without failure.
 * All packages except for alogger to be included in Debian/sid, and hopefully
   Debian/jessie.
+* Package should be available on code.vpac.org, wheezy and sid.
+
+Needs upstream update
+---------------------
+* python3-django-jsonfield (http://bugs.debian.org/753462)
+* python3-tldap (http://bugs.debian.org/753482)
+* python3-django-south: Will be included in Django 1.7, which will be released
+  soon.
 
 Debian New
 ----------
 Fixed versions of the following packages are waiting in Debian new queue
 for manual processing.
 
-* python3-tldap (http://bugs.debian.org/753482)
-* python3-django-xmlrpc (http://bugs.debian.org/753481)
 * python3-django-captcha
-* python3-django-jsonfield (http://bugs.debian.org/753462)
 * python3-django-tables2
 * python3-django-filters
 * python3-django-model-utils
+* python3-django-pipeline (http://bugs.debian.org/753556)
 
 Done
 ----
-The following packages already support Python3 in Debian:
+The following packages are complete:
 
+* python-numpydoc (required by python3-matplotlib build)
 * python3-django (http://bugs.debian.org/753556).
 * python3-pil (required by python3-django-captcha).
 * python3-ajax-select
+* python3-django-xmlrpc (http://bugs.debian.org/753481)
+* python3-factory-boy (http://bugs.debian.org/753558)
+* python3-matplotlib (building for wheezy)
 
 This list may be incomplete.
-
