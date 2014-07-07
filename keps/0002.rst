@@ -44,19 +44,6 @@ Needs upstream update
    * All tests pass (except slurm).
    * Needs new upstream release.
 
-*  python3-django-jsonfield
-
-   *  Latest release in Debian new with patch
-      [`Debian bug <http://bugs.debian.org/753462>`_]
-   *  `Upstream bug report
-      <https://bitbucket.org/schinckel/django-jsonfield/issue/32/new-release-and-python3-support>`_.
-   * Upstream has released version 0.9.13, this needs to be packaged.
-
-*  python3-tldap
-
-   *  Latest release in Debian new [`ITP <http://bugs.debian.org/753482>`_]
-   *  Some minor changes implemented in git required for Karaage.
-
 *  python3-django-south: Will be included in Django 1.7, which will be released
    soon.
 
@@ -68,6 +55,17 @@ for manual processing.
 *  python3-django-captcha
 *  python3-django-model-utils
 *  python3-django-pipeline [`Debian bug <http://bugs.debian.org/753556>`_]
+*  python3-django-jsonfield
+
+   *  `Upstream bug report
+      <https://bitbucket.org/schinckel/django-jsonfield/issue/32/new-release-and-python3-support>`_.
+   *  Latest release in Debian
+      [`Debian bug <http://bugs.debian.org/753462>`_]
+   *  All issues resolved.
+
+*  python3-tldap
+
+   *  Latest release in Debian new [`ITP <http://bugs.debian.org/753482>`_]
 
 Done
 ----
