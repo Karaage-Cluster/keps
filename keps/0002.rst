@@ -34,8 +34,6 @@ Not started
 -----------
 *  python3-celery [`Debian bug <http://bugs.debian.org/753555>`_]
 *  python3-django-celery (requires python3-celery)
-*  python3-flup (`upstream dead <http://www.saddi.com/software/flup/>`_?)
-*  python3-mysqldb (`upstream dead <http://mysql-python.sourceforge.net/>`_?)
 
 Needs upstream update
 ---------------------
@@ -77,5 +75,6 @@ The following packages are complete:
 *  python3-matplotlib
 *  python3-django-tables2
 *  python3-django-filters
+*  python3-mysqldb (not done; depreciated, use mysql-connector instead)
 
 This list may be incomplete.
