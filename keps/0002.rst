@@ -39,11 +39,6 @@ Not started
 
 Needs upstream update
 ---------------------
-*  python3-alogger
-
-   * All tests pass (except slurm).
-   * Needs new upstream release.
-
 *  python3-django-south: Will be included in Django 1.7, which will be released
    soon.
 
@@ -66,6 +61,8 @@ for manual processing.
 *  python3-tldap
 
    *  Latest release in Debian new [`ITP <http://bugs.debian.org/753482>`_]
+
+*  python3-alogger
 
 Done
 ----
