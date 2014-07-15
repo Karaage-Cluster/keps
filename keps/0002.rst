@@ -46,21 +46,7 @@ Fixed versions of the following packages are waiting in Debian new queue
 for manual processing.
 
 *  python3-django-captcha
-*  python3-django-model-utils
-*  python3-django-pipeline [`Debian bug <http://bugs.debian.org/753556>`_]
-*  python3-django-jsonfield
-
-   *  `Upstream bug report
-      <https://bitbucket.org/schinckel/django-jsonfield/issue/32/new-release-and-python3-support>`_.
-   *  Latest release in Debian
-      [`Debian bug <http://bugs.debian.org/753462>`_]
-   *  All issues resolved.
-
-*  python3-tldap
-
-   *  Latest release in Debian new [`ITP <http://bugs.debian.org/753482>`_]
-
-*  python3-alogger
+*  python3-tldap [`ITP <http://bugs.debian.org/753482>`_]
 
 Done
 ----
@@ -76,5 +62,14 @@ The following packages are complete:
 *  python3-django-tables2
 *  python3-django-filters
 *  python3-mysqldb (not done; depreciated, use mysql-connector instead)
+*  python3-django-jsonfield
 
-This list may be incomplete.
+   *  `Upstream bug report
+      <https://bitbucket.org/schinckel/django-jsonfield/issue/32/new-release-and-python3-support>`_.
+   *  Latest release in Debian
+      [`Debian bug <http://bugs.debian.org/753462>`_]
+   *  All issues resolved.
+
+*  python3-django-pipeline [`Debian bug <http://bugs.debian.org/753556>`_]
+*  python3-alogger
+*  python3-django-model-utils
