@@ -35,11 +35,6 @@ Not started
 *  python3-celery [`Debian bug <http://bugs.debian.org/753555>`_]
 *  python3-django-celery (requires python3-celery)
 
-Needs upstream update
----------------------
-*  python3-django-south: Will be included in Django 1.7, which will be released
-   soon.
-
 Debian New
 ----------
 Fixed versions of the following packages are waiting in Debian new queue
@@ -47,6 +42,13 @@ for manual processing.
 
 *  python3-django-captcha [`ITP <http://bugs.debian.org/752140>`_]
 *  python3-tldap [`ITP <http://bugs.debian.org/753482>`_]
+
+Broken
+------
+*  python3-django-south. South is obsolete. Django 1.7 has a new migration
+   system that is incompatable with South. All migrations will have to be
+   carried out with Django 1.6 before upgrading to Django 1.7. Karaage 3.2.0
+   will be the first version of Karaage to support Django 1.7.
 
 Done
 ----
