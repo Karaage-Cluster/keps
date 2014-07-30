@@ -45,7 +45,7 @@ Debian New
 Fixed versions of the following packages are waiting in Debian new queue
 for manual processing.
 
-*  python3-django-captcha
+*  python3-django-captcha [`ITP <http://bugs.debian.org/752140>`_]
 *  python3-tldap [`ITP <http://bugs.debian.org/753482>`_]
 
 Done
