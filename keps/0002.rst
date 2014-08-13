@@ -32,7 +32,6 @@ For each package, we need to:
 
 Not started
 -----------
-*  python3-celery [`Debian bug <http://bugs.debian.org/753555>`_]
 *  python3-django-celery (requires python3-celery)
 
 Debian New
@@ -42,6 +41,8 @@ for manual processing.
 
 *  python3-django-captcha [`ITP <http://bugs.debian.org/752140>`_]
 *  python3-tldap [`ITP <http://bugs.debian.org/753482>`_]
+*  python3-django-nose
+*  python3-celery [`Debian bug <http://bugs.debian.org/753555>`_]
 
 Broken
 ------
@@ -49,6 +50,8 @@ Broken
    system that is incompatable with South. All migrations will have to be
    carried out with Django 1.6 before upgrading to Django 1.7. Karaage 3.2.0
    will be the first version of Karaage to support Django 1.7.
+*  python-kombu won't build on wheezy, which prevents compiling
+   python3-celery and python3-django-celery for wheezy.
 
 Done
 ----
@@ -75,3 +78,4 @@ The following packages are complete:
 *  python3-django-pipeline [`Debian bug <http://bugs.debian.org/753556>`_]
 *  python3-alogger
 *  python3-django-model-utils
+*  python3-kombu [`Debian bug <https://bugs.debian.org/754047>`_]
