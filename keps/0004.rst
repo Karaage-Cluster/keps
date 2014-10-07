@@ -1,0 +1,118 @@
+KEP 4: Usage Information
+========================
+
+:Created: 2014-09-19
+:Author: Brian May
+:Status: Draft
+
+
+Overview
+--------
+Fix the Karaage Usage plugin.
+
+Rationale
+---------
+The Karaage Usage plugin no longer meets the current requirements. It is slow
+and unreliable. The results it produces look ugly. Rather then continue to
+patch the existing usage plugin, we need to evaluate the requirements, so we
+can work out the best way if proceeding.
+
+Requirements
+------------
+Must have. These are essential. There is no point in proceeding if we cannot
+get these.
+
+*  Clean upgrade path from Karaage Usage with minimal/no loss of data.
+*  Usable speed, with over 8 million records.
+*  Make summarized information available in CSV files and automatically generated graphs.
+
+Should have. These are desirable, however not a show stopper if we can't have
+them.
+
+*  MySQL database.
+*  Access any data with no waiting.
+*  Client side rendering of graphs.
+
+Optional. If we can get everything else done, we should look at including
+these.
+
+* TARDIS technology.
+
+  * Should be bigger on the inside then the outside.
+  * Should be able to retrieve results in advance of the job being submitted.
+
+* World peace.
+
+Reports
+-------
+
+Inputs:
+
+* filters, can be one or more of:
+
+  * begin date
+  * end date
+  * account
+  * person
+  * project
+  * institute
+  * machine
+  * machine category
+
+* summarize by, can be one or more of the following keywords:
+
+  * date
+  * account
+  * person
+  * project
+  * institute
+  * machine
+  * machine category
+
+* sort order, can be one of:
+
+  * date
+  * cpu_time
+
+Process:
+
+* Filter jobs that match the filters.
+* Process summary option.
+* Sort by designated sort order.
+
+Outputs:
+
+* If no summary requested, output:
+
+  * Job ID
+  * account
+  * project
+  * machine
+  * date
+  * Queue
+  * cpu_usage
+  * cores
+  * vmem
+  * Time in Queue
+  * Estimated wall time
+  * Actual wall time
+
+* If summary requested, output:
+
+  * summary field
+  * total cpu_usage.
+  * total cores.
+  * total vmem.
+  * total time in queue.
+  * total estimated wall time.
+  * total actual wall time.
+  * core report.
+  * memory report.
+
+* Graphs, as appropriate for summary options.
+
+
+Implementation
+--------------
+
+Tux will do it.
