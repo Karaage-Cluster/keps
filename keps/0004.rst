@@ -25,6 +25,10 @@ get these.
 *  Clean upgrade path from Karaage Usage with minimal/no loss of data.
 *  Usable speed, with over 8 million records.
 *  Make summarized information available in CSV files and automatically generated graphs.
+*  People's institutes and project's institutes should be recorded for each
+   job, so that the per institute usage information remains valid even if a
+   person changes their institute or a project changes their institute at a
+   later date
 
 Should have. These are desirable, however not a show stopper if we can't have
 them.
