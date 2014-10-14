@@ -13,7 +13,7 @@ Fix the Karaage Usage plugin.
 Rationale
 ---------
 The Karaage Usage plugin no longer meets the current requirements. It is slow
-and unreliable. The results it produces look ugly. Rather then continue to
+and unreliable. The results it produces look ugly. Rather than continue to
 patch the existing usage plugin, we need to evaluate the requirements, so we
 can work out the best way if proceeding.
 
@@ -38,7 +38,7 @@ these.
 
 * TARDIS technology.
 
-  * Should be bigger on the inside then the outside.
+  * Should be bigger on the inside than the outside.
   * Should be able to retrieve results in advance of the job being submitted.
 
 * World peace.
