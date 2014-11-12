@@ -125,4 +125,4 @@ Once you've written a KEP and submitted the pull request, post a message about
 it to the Karaage mailing list. At that point, Karaage developers will
 make sure it's technically feasible, not spam, etc., assign it a KEP number and
 commit it to the repository as "Active." This doesn't mean the feature will be
-implemented; it merely means the proposal is officially a DEP.
+implemented; it merely means the proposal is officially a KEP.
