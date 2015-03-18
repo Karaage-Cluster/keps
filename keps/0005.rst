@@ -1,0 +1,195 @@
+KEP 5: Karaage 4
+================
+
+:Created: 2015-03-17
+:Author: Brian May
+:Status: Draft
+
+
+Overview
+--------
+This document outlines the path for the future of Karaage, including Karaage 4.
+
+This doesn't isn't an official V3 Alliance document and doesn't reflect V3's
+official position with Karaage. It is draft status only, and the contents may
+change without notice.
+
+Contributions are welcome.
+
+
+Background
+----------
+Karaage is a cluster management system initially developed by VPAC (now V3
+Alliance), and is in use by numerous organisations around Australia. As a major
+piece of infrastructure software, it has been unfortunately, lagging with
+respect to innovation and development of new features. Currently the majority
+of code development is tied to one individual, with minimal input from other
+stakeholders.
+
+V3 Alliance has been installing Karaage at clusters setup for V3's clients.
+Unfortunately these sites often get deployed without any sort of maintenance
+plan. This results in clients repeatedly encountering known bugs that
+have been fixed in the latest Karaage version, which in turn gives
+Karaage a bad look.
+
+One of these sites was VLSCI. VLSCI started encountering limitations of
+Karaage.  As a result, they employed Common Code to deliver a set of features.
+Common Code produced a new schema for Karaage, however were unable to produce
+the new views to take advantage of this new schema in the time allowed.
+
+A related issue that has risen is the need to pay for Karaage development.
+Development is an expensive process, and there is no funding model to
+continue the development of Karaage.
+
+
+Current Progress
+----------------
+There were a number of issues with the Common Code repository. These changes
+were cleaned up into a set of well formed patches, and these applied against
+Karaage 3 to create the new official Karaage4 branch.
+
+Major Changes adapted from Common Code and merged into Karaage4 branch:
+
+* Make institute/project/software groups unique. Every group can only be used
+  by one institute, by one project, and by one piece of software.
+* Add CareerLevel table. Every person can has a career level.
+* Add ProjectLevel table. Every person has a project level for every project.
+* New method to set group members.
+* New ProjectMembership table. Changes to membership get written to the Group
+  table. Changes to the Group table will not get synced to this table.
+* Projects hierarchy.
+* Add GrantSchemes table.
+* Add resources and resource pools.
+* Add Grants and Allocations.
+* Add aggregated usage table.
+* Add audit logs to more tables (except Person???)
+* Add allocation_mode to projects.
+* Make group references OneToOneFields.
+
+Changes not yet merged into Karaage4 branch and need further discussion and/or
+further work:
+
+* PublicNotes
+* Changes to groups.
+* Changes to configuration.
+
+Karaage 4 requires Django 1.7, which means Django south migrations will not
+work any more. This means that installations must upgrade to Karaage 3 first
+before upgrading to Karaage 4.
+
+Rationale
+---------
+The CareerLevel table is used to specify the job title of the Person.
+
+The ProjectLevel table is required for ???.
+
+The ProjectMembership table is required to keep track of additional information
+for every Person in a particular project, such as the ProjectLevel and the
+person's role inside the project. A Person can be a supervisor or leader of a
+project. A Person can nominate a project as a default project. A person can
+be designated the primary contact for the project.
+
+The project hierarchy replaces the current institute model. The top level
+projects would be the institutes, and the descendants the projects belonging
+to these institutes. This means usage can be assigned to a project, and this
+will work even if the project is an institute.
+
+Karaage 4 supports tracking information other then CPU hours. This is done
+by defining a ResourcePool for every metric we want to track. The Resource
+defines how we track this metric for a given machine.
+
+The Scheme defines a source of grants over a specific period of time. The
+Grant defines an allowance of resources for a specific project for a specific
+duration, but does not define what those resources are. The AllocationPool adds
+the resource pool used by the project over a specific time period, and
+the Allocation defines what the allowance is for this resource pool.
+
+The aggregated usage table is designed to speed up access to usage information
+by aggregating it into one table, as well as make it independent of the
+resource being monitored.
+
+
+Example:
+-------
+At a fictional site, we have the following machines:
+
+* MachineCategory { name: default }
+* Machine { name: brecca, machine_category: default }
+* Machine { name: tango, machine_category: default }
+
+We define the following projects:
+
+* Project { pid: InstituteA }
+* Project { pid: InstituteB }
+* Project { pid: ProjectA, parent: InstituteA }
+* Project { pid: ProjectB, parent: InstituteA }
+* Project { pid: ProjectC, parent: InstituteC }
+* Project { pid: ProjectD, parent: ProjectC }
+
+This shows how the project hierarchy would work.
+
+We want to track disk space and CPU hours, so we define two resource pools.
+
+* ResourcePool { name: Disk Space }
+* ResourcePool { name: CPU Hours }
+
+We define the following resources:
+
+* Resource { machine: brecca, resource_pool: Disk Space, quantity=??? }
+* Resource { machine: brecca, resource_pool: CPU Hours, quantity=??? }
+* Resource { machine: tango, resource_pool: Disk Space, quantity=??? }
+* Resource { machine: tango, resource_pool: CPU Hours, quantity=??? }
+
+For this fictional site, ET is the major sponsor, So we define the following
+scheme:
+
+* Scheme { name: ET, opened: 2100-01-01, closed=None }
+
+ET has been generous enough to give Grants to various projects:
+
+* Grant { id: 1, project: ProjectA, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
+* Grant { id: 2, project: ProjectD, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
+
+At this stage we haven't defined the resources allocated for this project. Lets
+do that:
+
+* AllocationPool { id: 1, project: ProjectA, period: 2100, pool: Disk Space }
+* Allocation { grant: 1, allocation_pool: 1, quantity: 100KB }
+* Allocation { grant: 1, allocation_pool: 1, quantity: 500KB }
+* AllocationPool { id: 2, project: ProjectA, period: 2100, pool: CPU Hours }
+* Allocation { grant: 1, allocation_pool: 2, quantity: 10 }
+* Allocation { grant: 1, allocation_pool: 2, quantity: 50 }
+
+Note that the two resource pools have different properties - CPU hours is
+accumulative and each new entry will add to the previous total. Where as with
+disk space, we are more concerned about the maximum about of disk space used
+at any one time. The distinction between these two formats has not been made
+in the current schema.
+
+
+Future work
+-----------
+Future technical changes required:
+
+* Import usage information into aggregated table.
+* Migration to put usage information in new aggregated table.
+* Rewrite usage plugin. New plugin should be able to graph data from multiple
+  sources, e.g. CPU time and disk space.
+
+Funding issues:
+
+* It has been suggested that a way forward would be to make Karaage
+  proprietary. However Karaage has always been Open Source software and has had
+  contributions from different sources. Changing this would be infeasible.
+
+* Another option that has been suggested is to develop proprietary add on
+  plugins for Karaage. This would limit the exposure of these plugins however,
+  and likely to severely limit the user base for the plugin.
+
+* V3 Alliance should be selling support contracts with every Karaage
+  installation deployed. We should be ensuring that all Karaage installations
+  are up-to-date with the latest stable release of Karaage, with latest
+  security updates.
+
+* Furthermore V3 Alliance should supply feature requests in exchange for
+  funding for the development work required.
