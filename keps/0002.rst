@@ -3,7 +3,7 @@ KEP 2: Python 3
 
 :Created: 2014-06-30
 :Author: Brian May
-:Status: Draft
+:Status: Complete
 
 
 Overview
