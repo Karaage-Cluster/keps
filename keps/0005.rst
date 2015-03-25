@@ -51,44 +51,63 @@ There were a number of issues with the Common Code repository. These changes
 were cleaned up into a set of well formed patches, and these applied against
 Karaage 3 to create the new official Karaage4 branch.
 
-Major Changes adapted from Common Code and merged into Karaage4 branch:
-
-* Make institute/project/software groups unique. Every group can only be used
-  by one institute, by one project, and by one piece of software.
-* Add CareerLevel table. Every person can has a career level.
-* Add ProjectLevel table. Every person has a project level for every project.
-* New method to set group members.
-* New ProjectMembership table. Changes to membership get written to the Group
-  table. Changes to the Group table will not get synced to this table.
-* Projects hierarchy.
-* Add GrantSchemes table.
-* Add resources and resource pools.
-* Add Grants and Allocations.
-* Add aggregated usage table.
-* Add audit logs to more tables (except Person???)
-* Add allocation_mode to projects.
-* Make group references OneToOneFields.
-
-Changes not yet merged into Karaage4 branch and need further discussion and/or
-further work:
-
-* PublicNotes
-* Changes to groups.
-* Changes to configuration.
-
 Karaage 4 requires Django 1.7, which means Django south migrations will not
 work any more. This means that installations must upgrade to Karaage 3 first
 before upgrading to Karaage 4.
 
-Rationale
----------
-This section documents the changes that have been made or proposed for Karaage 4 with the rationale as to why the changes have been considered a good idea.
+The next two sections describe these changes in detail.
+
+
+Rationale - Merged
+------------------
+This section documents the changes that have been merged in Karaage 4 with the
+rationale as to why the changes have been considered a good idea.
+
+Currently this section only documents significant changes, e.g. changes to
+database models. It does not worry about adding additional methods or bug
+fixes.
+
+.. contents:: :local:
+
+Unique Groups
+~~~~~~~~~~~~~
+``Institute``, ``Project``, and ``Software`` previously referenced groups
+using:
+
+.. code-block:: python
+
+    group = models.ForeignKey(Group)
+
+This has now been changed to:
+
+.. code-block:: python
+
+    group = models.OneToOneField(Group, unique=True)
+
+
+This change means every group can only be used  by one ``Institute``, by one
+``Project``, a nd by one piece of ``Software``.
+
+Git commits:
+
+* `335332b03dd1ba5ea53f97482329809ec2f34b61 <https://github.com/Karaage-Cluster/karaage/commit/335332b03dd1ba5ea53f97482329809ec2f34b61>`_
+* `02bb0a63f10e994656f44ff8ac9ae14ef87c84b9 <https://github.com/Karaage-Cluster/karaage/commit/02bb0a63f10e994656f44ff8ac9ae14ef87c84b9>`_
 
 Use of Audit Log
 ~~~~~~~~~~~~~~~~
-The audit log plugin creates a duplicate database table for every model that records historic information for the models.
-It's use may mean that adhoc methods used in Karaage to record historic information may not be required anymore, and should
-be refactored.
+The audit log plugin creates a duplicate database table for every model that
+records historic information for the models.  It's use may mean that adhoc
+methods used in Karaage to record historic information may not be required
+anymore, and should be refactored.
+
+AuitLog has not yet been applied to the ``Person`` model.
+
+Git commits:
+
+* `694b9224320bfd8a22aace60fc9f7c08dc2fbc6e <https://github.com/Karaage-Cluster/karaage/commit/694b9224320bfd8a22aace60fc9f7c08dc2fbc6e>`_
+* `8b7f0c7e61dbea679ecabe29a717156b2c0f62fc <https://github.com/Karaage-Cluster/karaage/commit/8b7f0c7e61dbea679ecabe29a717156b2c0f62fc>`_
+* + others
+
 
 CareerLevel model
 ~~~~~~~~~~~~~~~~~
@@ -119,6 +138,10 @@ CareerLevel model
 
 The ``CareerLevel`` table is used to specify the job title of the Person.
 
+Git commits:
+
+* `5558119d155de9e3629c6940adb84f25c9920aac <https://github.com/Karaage-Cluster/karaage/commit/5558119d155de9e3629c6940adb84f25c9920aac>`_
+
 ProjectLevel model
 ~~~~~~~~~~~~~~~~~~
 
@@ -137,6 +160,11 @@ ProjectLevel model
             ordering = ['level']
 
 The ``ProjectLevel`` table is required for ???.
+
+Git commits:
+
+* `fae218bf10f612b001793f227abbceaff6e42a26 <https://github.com/Karaage-Cluster/karaage/commit/fae218bf10f612b001793f227abbceaff6e42a26>`_
+
 
 ProjectMembership model
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -186,6 +214,12 @@ person's role inside the project. A ``Person`` can be a supervisor or leader of 
 ``Project``. A ``Person`` can nominate a ``Project`` as a default project. A ``Person`` can
 be designated the primary contact for the ``Project``.
 
+Git commits:
+
+* `7a9be9a3df920d16fb77e18b268d037ac4531b7b <https://github.com/Karaage-Cluster/karaage/commit/7a9be9a3df920d16fb77e18b268d037ac4531b7b>`_
+
+
+
 Project model
 ~~~~~~~~~~~~~
 
@@ -206,9 +240,13 @@ Project model
         ...
 
 The ``Project`` hierarchy, using MPTT, replaces the current ``Institute`` model. The top level
-``Projects`` would be the ``Institutes``, and the descendants the ``Projects` belonging
+``Projects`` would be the ``Institutes``, and the descendants the ``Projects`` belonging
 to these ``Institutes``. This means usage can be assigned to a ``Project``, and this
 will work even if the ``Project`` is an ``Institute``.
+
+Git commits:
+
+* `b14ae1dec77a7323f9da49a5708df01c5d77c6ad <https://github.com/Karaage-Cluster/karaage/commit/b14ae1dec77a7323f9da49a5708df01c5d77c6ad>`_
 
 Schemes model
 ~~~~~~~~~~~~~
@@ -235,8 +273,13 @@ Schemes model
 
 The ``Scheme`` defines a source of grants over a specific period of time.
 
-Resource and ResourcePool models
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Git commits:
+
+* `0173243e1c0b7b8fccf44444b429a56b0c6825d8 <https://github.com/Karaage-Cluster/karaage/commit/0173243e1c0b7b8fccf44444b429a56b0c6825d8>`_
+
+
+ResourcePool model
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -251,6 +294,20 @@ Resource and ResourcePool models
         class Meta:
             ordering = ['name']
 
+
+Karaage 4 supports tracking information other then CPU hours. This is done
+by defining a ``ResourcePool`` for every metric we want to track. The ``Resource``
+model defines how we track this metric for a given ``Machine``.
+
+Git commits:
+
+* `0173243e1c0b7b8fccf44444b429a56b0c6825d8 <https://github.com/Karaage-Cluster/karaage/commit/0173243e1c0b7b8fccf44444b429a56b0c6825d8>`_
+
+
+Resource model
+~~~~~~~~~~~~~~
+
+.. code-block:: python
 
     class Resource(models.Model):
 
@@ -291,8 +348,13 @@ Karaage 4 supports tracking information other then CPU hours. This is done
 by defining a ``ResourcePool`` for every metric we want to track. The ``Resource``
 model defines how we track this metric for a given ``Machine``.
 
-Grant, AllocationPool, Allocation, and AllocationPeriod models
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Git commits:
+
+* `0173243e1c0b7b8fccf44444b429a56b0c6825d8 <https://github.com/Karaage-Cluster/karaage/commit/0173243e1c0b7b8fccf44444b429a56b0c6825d8>`_
+
+
+Grant model
+~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -316,6 +378,16 @@ Grant, AllocationPool, Allocation, and AllocationPeriod models
                 'project__name',
                 'description',
             ]
+
+Git commits:
+
+* `9677dfb6f1ae37f19a1622a465ede9a9c8527635 <https://github.com/Karaage-Cluster/karaage/commit/9677dfb6f1ae37f19a1622a465ede9a9c8527635>`_
+
+
+AllocationPool model
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
 
     class AllocationPool(models.Model):
 
@@ -370,6 +442,16 @@ Grant, AllocationPool, Allocation, and AllocationPeriod models
                 'project__name',
             ]
 
+Git commits:
+
+* `9677dfb6f1ae37f19a1622a465ede9a9c8527635 <https://github.com/Karaage-Cluster/karaage/commit/9677dfb6f1ae37f19a1622a465ede9a9c8527635>`_
+
+
+Allocation model
+~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
     class Allocation(models.Model):
         description = models.CharField(max_length=100)
         grant = models.ForeignKey('karaage.Grant')
@@ -385,6 +467,16 @@ Grant, AllocationPool, Allocation, and AllocationPeriod models
             ordering = [
                 'allocation_pool',
             ]
+
+Git commits:
+
+* `9677dfb6f1ae37f19a1622a465ede9a9c8527635 <https://github.com/Karaage-Cluster/karaage/commit/9677dfb6f1ae37f19a1622a465ede9a9c8527635>`_
+
+
+AllocationPeriod model
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
 
     class AllocationPeriod(models.Model):
         name = models.CharField(max_length=255)
@@ -408,11 +500,121 @@ duration, but does not define what those resources are. The ``AllocationPool`` a
 the resource pool used by the project over a specific time period (``AllocationPeriod``), and
 the ``Allocation`` defines what the allowance is for this resource pool.
 
+Git commits:
+
+* `9677dfb6f1ae37f19a1622a465ede9a9c8527635 <https://github.com/Karaage-Cluster/karaage/commit/9677dfb6f1ae37f19a1622a465ede9a9c8527635>`_
+
+
+
+allocation_mode attribute
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+ @python_2_unicode_compatible
+ class Project(MPTTModel):
+
+    class AllocationMode:
+        PRIVATE = 'private'
+        SHARED = 'shared'
+        # CAPPED = 'capped'
+
+    ALLOCATION_MODE_CHOICES = [
+        (
+            AllocationMode.PRIVATE,
+            'Private (this project only)',
+        ),
+        (
+            AllocationMode.SHARED,
+            'Shared (this project and all sub-projects)',
+        ),
+        # (
+        #     AllocationMode.CAPPED,
+        #     'Capped (use parent allocation up to this amount)',
+        # ),
+    ]
+
+    allocation_mode = models.CharField(
+        max_length=20,
+        choices=ALLOCATION_MODE_CHOICES,
+        default=AllocationMode.PRIVATE,
+    )
+
+    ...
+
+Git commits:
+
+* `93e13e00eb9997a1b5e73b9840900aac4056109c <https://github.com/Karaage-Cluster/karaage/commit/93e13e00eb9997a1b5e73b9840900aac4056109c>`_
+
+
 Usage model
 ~~~~~~~~~~~
+
+.. code-block:: python
+
+    @python_2_unicode_compatible
+    class Usage(models.Model):
+        account = models.ForeignKey('karaage.Account')
+        allocation_pool = models.ForeignKey('karaage.AllocationPool', null=True)
+        allocation_period = models.ForeignKey(
+            'karaage.AllocationPeriod', null=True)
+        content_type = models.ForeignKey('contenttypes.ContentType')
+        grant = models.ForeignKey('karaage.Grant', null=True)
+        person_institute = models.ForeignKey(
+            'karaage.Institute',
+            related_name='person_institute',
+            null=True,
+        )
+        project_institute = models.ForeignKey(
+            'karaage.Institute',
+            related_name='project_institute',
+        )
+        machine = models.ForeignKey('karaage.Machine')
+        person = models.ForeignKey('karaage.Person', null=True)
+        submitted_project = models.ForeignKey(
+            'karaage.Project',
+            related_name='submitted_usage',
+        )
+        allocated_project = models.ForeignKey(
+            'karaage.Project',
+            related_name='allocated_usage',
+            null=True,
+        )
+        resource = models.ForeignKey('karaage.Resource')
+        resource_pool = models.ForeignKey('karaage.ResourcePool', null=True)
+        scheme = models.ForeignKey('karaage.Scheme', null=True)
+        person_project_level = models.ForeignKey(
+            'karaage.ProjectLevel',
+            blank=True, null=True,  # legacy data doesn't have person project level
+        )
+        person_career_level = models.ForeignKey(
+            'karaage.CareerLevel',
+            blank=True, null=True,  # legacy data doesn't have person career level
+        )
+        count = models.PositiveIntegerField()
+        created = models.DateTimeField(auto_now_add=True)
+        description = models.CharField(max_length=255)
+        range_start = models.DateTimeField()
+        range_end = models.DateTimeField()
+        raw_used = models.FloatField()
+        used = models.FloatField()
+
+        def __str__(self):
+            return self.description
+
 The aggregated ``Usage`` model is designed to speed up access to usage information
 by aggregating it into one table, as well as make it independent of the
 resource being monitored.
+
+* `c7d4ad0c7cd8abdab37d973f64aa127b21ba66f7 <https://github.com/Karaage-Cluster/karaage/commit/c7d4ad0c7cd8abdab37d973f64aa127b21ba66f7>`_
+
+
+Rationale - Pending
+-------------------
+This section documents the changes that have not yet been merged in Karaage 4
+with the rationale as to why the changes have been considered a good idea.
+
+.. contents:: :local:
 
 PublicNotes model
 ~~~~~~~~~~~~~~~~~
@@ -435,6 +637,54 @@ PublicNotes model
             ordering = ['-when']
 
 This needs a use case.
+
+Gerrit change:
+
+* `1476 <https://code.vpac.org/gerrit/#/c/1476/>`_
+
+
+Group Parent
+~~~~~~~~~~~~
+
+.. code-block::
+
+    class Group(models.Model):
+ 
+        """
+        Groups represent collections of people, these objects can be
+        expressed externally in a datastore.
+
+        Groups here are replicated to clusters as posix groups (/etc/groups) with
+        their associated members.  Groups should relate to a parent which provides
+        the motivation for having the group, for example members of a project
+        should be members of the group associated with the project - the parent
+        generic foreign key in this instance would refer to the project.
+
+        The parent relationship also helps to avoid shadow namespacing issues where
+        things like project PIDs and institute names are the same (think "RMIT").
+        The application code is forced to resolve any naming conflicts, and group
+        membership synchronisation issues are no longer possible.
+        """
+        name = models.CharField(max_length=255, unique=True, null=True)
+        content_type = models.ForeignKey(ContentType, blank=True, null=True)
+        object_id = models.PositiveIntegerField(blank=True, null=True)
+        parent = GenericForeignKey('content_type', 'object_id')
+        
+This is a series of changes dependant based on the first change which adds a parent field from every group to the object that used it. This duplicates the OneToOneField as described in `Unique Groups`_.
+
+In turn, this allows creating groups and picking a unique name automatically.
+
+It also allows code to generate an error if the user attempts to modify the groups directly instead of via the appropriate interface for the parent.
+
+While these are required changes, work needs to be done to see if the same results can be achieved without duplication of the data in the database.
+
+Gerrit change:
+
+* `1498 <https://code.vpac.org/gerrit/#/c/1498/>`_
+* `1499 <https://code.vpac.org/gerrit/#/c/1499/>`_
+* `1500 <https://code.vpac.org/gerrit/#/c/1500/>`_
+
+
 
 Example
 -------
