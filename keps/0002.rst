@@ -17,13 +17,13 @@ to support Python 3 if we want ensure Karaage remains relevant.
 
 Implementation
 --------------
-Beforce we can start, we need to ensure that there are Debian python3 packages
+Before we can start, we need to ensure that there are Debian python3 packages
 of all the relevant libraries.
 
 For each package, we need to:
 
 *  All required libraries have also been updated.
-*  Ensure code is compatable with Python 2.7, Python 3.2 and Python 3.4.
+*  Ensure code is compatible with Python 2.7, Python 3.2 and Python 3.4.
 *  Debian packages for python3.
 *  All tests run without failure.
 *  All packages except for alogger to be included in Debian/sid, and hopefully
@@ -40,7 +40,7 @@ for manual processing.
 Broken
 ------
 *  python3-django-south. South is obsolete. Django 1.7 has a new migration
-   system that is incompatable with South. All migrations will have to be
+   system that is incompatible with South. All migrations will have to be
    carried out with Django 1.6 before upgrading to Django 1.7. Karaage 3.2.0
    will be the first version of Karaage to support Django 1.7.
 

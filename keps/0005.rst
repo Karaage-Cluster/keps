@@ -109,7 +109,7 @@ by aggregating it into one table, as well as make it independent of the
 resource being monitored.
 
 
-Example:
+Example
 -------
 At a fictional site, we have the following machines:
 

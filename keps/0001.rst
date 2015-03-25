@@ -34,7 +34,7 @@ planning of new features has been spread across these places:
 * The Karaage mailing list
   (http://lists.vpac.org/cgi-bin/mailman/listinfo/karaage).
 
-* Github issue tracker
+* GitHub issue tracker
   (https://github.com/Karaage-Cluster/karaage/issues).
 
 * Gerrit
@@ -68,13 +68,13 @@ KEPs are for medium-to-large Karaage features. It's ultimately a judgment call,
 but here are some examples of existing Karaage features/efforts that would
 have required a KEP:
 
-* Make Karaage Python3 compatable.
+* Make Karaage Python3 compatible.
 
 * Rewrite of the usage module.
 
 * Changing the overall Karaage design.
 
-* Changes that are break backwords compatability.
+* Changes that are break backwards compatibility.
 
 * Improving the Karaage authorization model.
 
@@ -114,7 +114,7 @@ Beyond that, a KEP should include the following sections:
 * Implementation. A technical description of how this feature will
   be implemented. This may or may not include code snippets.
 
-The KEP should consider if any changes are required to the `Karage-SRS
+The KEP should consider if any changes are required to the `Karaage-SRS
 <https://readthedocs.org/builds/karaage-srs/>`_, which lists the
 Karaage specifications.
 
