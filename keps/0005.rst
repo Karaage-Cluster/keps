@@ -5,6 +5,9 @@ KEP 5: Karaage 4
 :Author: Brian May
 :Status: Draft
 
+.. contents:: :local:
+
+.. sectnum::
 
 Overview
 --------
@@ -79,31 +82,76 @@ before upgrading to Karaage 4.
 
 Rationale
 ---------
+This section documents the changes that have been made or proposed for Karaage 4 with the rationale as to why the changes have been considered a good idea.
+
+Use of Audit Log
+~~~~~~~~~~~~~~~~
+The audit log plugin creates a duplicate database table for every model that records historic information for the models.
+It's use may mean that adhoc methods used in Karaage to record historic information may not be required anymore, and should
+be refactored.
+
+CareerLevel model
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    @python_2_unicode_compatible
+    class CareerLevel(models.Model):
+        level = models.CharField(max_length=255)
+
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return self.level
+
+        class Meta:
+            ordering = ['level']
+
+    @python_2_unicode_compatible
+    class Person(AbstractBaseUser):
+        career_level = models.ForeignKey(
+            'karaage.CareerLevel',
+            blank=False,  # don't allow saving without filling this in...
+            null=True,  # ...but do allow legacy records in DB to be NULL
+        )
+
 The CareerLevel table is used to specify the job title of the Person.
 
+ProjectLevel model
+~~~~~~~~~~~~~~~~~~
 The ProjectLevel table is required for ???.
 
+ProjectMembership model
+~~~~~~~~~~~~~~~~~~~~~~~
 The ProjectMembership table is required to keep track of additional information
 for every Person in a particular project, such as the ProjectLevel and the
 person's role inside the project. A Person can be a supervisor or leader of a
 project. A Person can nominate a project as a default project. A person can
 be designated the primary contact for the project.
 
+Project model
+~~~~~~~~~~~~~
 The project hierarchy replaces the current institute model. The top level
 projects would be the institutes, and the descendants the projects belonging
 to these institutes. This means usage can be assigned to a project, and this
 will work even if the project is an institute.
 
+Resource and ResourcePool models
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Karaage 4 supports tracking information other then CPU hours. This is done
 by defining a ResourcePool for every metric we want to track. The Resource
 defines how we track this metric for a given machine.
 
+Scheme,  Grant, AllocationPool, and Allocation tables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The Scheme defines a source of grants over a specific period of time. The
 Grant defines an allowance of resources for a specific project for a specific
 duration, but does not define what those resources are. The AllocationPool adds
 the resource pool used by the project over a specific time period, and
 the Allocation defines what the allowance is for this resource pool.
 
+Usage model
+~~~~~~~~~~~
 The aggregated usage table is designed to speed up access to usage information
 by aggregating it into one table, as well as make it independent of the
 resource being monitored.
@@ -171,6 +219,7 @@ Future work
 -----------
 Future technical changes required:
 
+* Investigate proposed changes to groups, see if this can be improved on.
 * Import usage information into aggregated table.
 * Migration to put usage information in new aggregated table.
 * Rewrite usage plugin. New plugin should be able to graph data from multiple
