@@ -115,44 +115,302 @@ CareerLevel model
             null=True,  # ...but do allow legacy records in DB to be NULL
         )
 
-The CareerLevel table is used to specify the job title of the Person.
+        ...
+
+The ``CareerLevel`` table is used to specify the job title of the Person.
 
 ProjectLevel model
 ~~~~~~~~~~~~~~~~~~
-The ProjectLevel table is required for ???.
+
+.. code-block:: python
+
+    @python_2_unicode_compatible
+    class ProjectLevel(models.Model):
+        level = models.CharField(max_length=255)
+
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return self.level
+
+        class Meta:
+            ordering = ['level']
+
+The ``ProjectLevel`` table is required for ???.
 
 ProjectMembership model
 ~~~~~~~~~~~~~~~~~~~~~~~
-The ProjectMembership table is required to keep track of additional information
-for every Person in a particular project, such as the ProjectLevel and the
-person's role inside the project. A Person can be a supervisor or leader of a
-project. A Person can nominate a project as a default project. A person can
-be designated the primary contact for the project.
+
+.. code-block:: python
+
+    @python_2_unicode_compatible
+    class ProjectMembership(models.Model):
+
+        """
+        Mapping between projects and people with details about their project role.
+
+        TODO: Automatic update project membership using signals from Group.members,
+        using defaults defined below.
+        """
+
+        person = models.ForeignKey('karaage.Person')
+        project = models.ForeignKey('karaage.Project')
+        project_level = models.ForeignKey(
+            'karaage.ProjectLevel',
+            blank=False,  # don't allow saving without filling this in...
+            null=True,  # ...but do allow legacy records in DB to be NULL
+        )
+        is_project_supervisor = models.BooleanField(default=False)
+        is_project_leader = models.BooleanField(default=False)
+        is_default_project = models.BooleanField(default=False)
+        is_primary_contact = models.BooleanField(default=False)
+
+        def __str__(self):
+            return '{} @ {}'.format(self.person, self.project)
+
+     @python_2_unicode_compatible
+     class Person(AbstractBaseUser):
+        projects = models.ManyToManyField(
+            'karaage.Project',
+            through='karage.ProjectMembership',
+            through_fields=('person', 'project'),
+        )
+
+        ...
+
+
+
+The ``ProjectMembership`` table is required to keep track of additional information
+for every ``Person`` in a particular ``Project``, such as the ``ProjectLevel`` and the
+person's role inside the project. A ``Person`` can be a supervisor or leader of a
+``Project``. A ``Person`` can nominate a ``Project`` as a default project. A ``Person`` can
+be designated the primary contact for the ``Project``.
 
 Project model
 ~~~~~~~~~~~~~
-The project hierarchy replaces the current institute model. The top level
-projects would be the institutes, and the descendants the projects belonging
-to these institutes. This means usage can be assigned to a project, and this
-will work even if the project is an institute.
+
+.. code-block:: python
+
+    class Project(MPTTModel):
+
+        ...
+
+        # MPTT fields
+        parent = TreeForeignKey(
+            'self', null=True, blank=True, related_name='children')
+        lft = models.PositiveIntegerField(db_index=True, editable=False)
+        rght = models.PositiveIntegerField(db_index=True, editable=False)
+        tree_id = models.PositiveIntegerField(db_index=True, editable=False)
+        level = models.PositiveIntegerField(db_index=True, editable=False)
+
+        ...
+
+The ``Project`` hierarchy, using MPTT, replaces the current ``Institute`` model. The top level
+``Projects`` would be the ``Institutes``, and the descendants the ``Projects` belonging
+to these ``Institutes``. This means usage can be assigned to a ``Project``, and this
+will work even if the ``Project`` is an ``Institute``.
+
+Schemes model
+~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    class Scheme(models.Model):
+        name = models.CharField(max_length=200, unique=True)
+        description = models.CharField(max_length=200, null=False, blank=True)
+        opened = models.DateField()
+        closed = models.DateField(null=True, blank=True)
+
+        objects = models.Manager()
+        active = ActiveSchemeManager()
+        deleted = DeletedSchemeManager()
+
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return self.name
+
+        class Meta:
+            ordering = ['name']
+
+The ``Scheme`` defines a source of grants over a specific period of time.
 
 Resource and ResourcePool models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Karaage 4 supports tracking information other then CPU hours. This is done
-by defining a ResourcePool for every metric we want to track. The Resource
-defines how we track this metric for a given machine.
 
-Scheme,  Grant, AllocationPool, and Allocation tables
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The Scheme defines a source of grants over a specific period of time. The
-Grant defines an allowance of resources for a specific project for a specific
-duration, but does not define what those resources are. The AllocationPool adds
-the resource pool used by the project over a specific time period, and
-the Allocation defines what the allowance is for this resource pool.
+.. code-block:: python
+
+    class ResourcePool(models.Model):
+        name = models.CharField(max_length=255, unique=True)
+
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return self.name
+
+        class Meta:
+            ordering = ['name']
+
+
+    class Resource(models.Model):
+
+        class ResourceType:
+            SLURM_CPU = 'slurm_cpu'
+            SLURM_MEM = 'slurm_mem'
+            GPFS = 'gpfs'
+
+        RESOURCE_TYPE_CHOICES = [
+            (ResourceType.SLURM_CPU, 'Slurm (CPU)'),
+            (ResourceType.SLURM_MEM, 'Slurm (MEM)'),
+            (ResourceType.GPFS, 'GPFS'),
+        ]
+
+        machine = models.ForeignKey('karaage.Machine')
+        resource_pool = models.ForeignKey('karaage.ResourcePool')
+        scaling_factor = models.FloatField()
+        resource_type = models.CharField(
+            max_length=255,
+            choices=RESOURCE_TYPE_CHOICES,
+        )
+        quantity = models.BigIntegerField()
+
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return '%s / %s @ %s' % (
+                self.machine,
+                self.resource_type,
+                self.resource_pool
+            )
+
+        class Meta:
+           ordering = ['resource_type']
+
+
+Karaage 4 supports tracking information other then CPU hours. This is done
+by defining a ``ResourcePool`` for every metric we want to track. The ``Resource``
+model defines how we track this metric for a given ``Machine``.
+
+Grant, AllocationPool, Allocation, and AllocationPeriod models
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    class Grant(models.Model):
+        project = models.ForeignKey('karaage.Project')
+        scheme = models.ForeignKey('karaage.Scheme')
+        description = models.CharField(max_length=255)
+        date = models.DateField()
+        begins = models.DateField()
+        expires = models.DateField()
+
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return self.description
+
+        class Meta:
+            ordering = [
+                '-expires',
+                '-project__end_date',
+                'project__name',
+                'description',
+            ]
+
+    class AllocationPool(models.Model):
+
+        """
+        Grouping of resources allocated to a grant (project).
+
+        AllocationMode='capped' is not supported yet, until a demonstratted need is
+        shown (and optionally that we can use an array of foreign key to relate
+        from Usage to AllocationPool to avoid the M2M join table).
+
+        TODO: User documentation of the allocation behaviour with concrete
+        examples.
+        """
+
+        project = models.ForeignKey('karaage.Project')
+        period = models.ForeignKey('karaage.AllocationPeriod')
+        resource_pool = models.ForeignKey('karaage.ResourcePool')
+
+        @cached_property
+        def allocated(self):
+            return self.allocation_set.aggregate(
+                a=models.Sum('quantity'))['a'] or 0.0
+
+        @cached_property
+        def used(self):
+            return self.usage_set.aggregate(u=models.Sum('used'))['u'] or 0.0
+
+        @cached_property
+        def raw_used(self):
+            return self.usage_set.aggregate(r=models.Sum('raw_used'))['r'] or 0.0
+
+        @cached_property
+        def used_percent(self):
+            if self.allocated == 0.0:
+                return None
+            return 100.0 * self.used / self.allocated
+
+        @cached_property
+        def remaining(self):
+            return self.allocated - self.used
+
+        objects = AllocationPoolQuerySet.as_manager()
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return 'Project: %s' % self.project.name
+
+        class Meta:
+            ordering = [
+                '-period__end',
+                '-project__end_date',
+                'project__name',
+            ]
+
+    class Allocation(models.Model):
+        description = models.CharField(max_length=100)
+        grant = models.ForeignKey('karaage.Grant')
+        allocation_pool = models.ForeignKey('karaage.AllocationPool')
+        quantity = models.FloatField()
+
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return self.description
+
+        class Meta:
+            ordering = [
+                'allocation_pool',
+            ]
+
+    class AllocationPeriod(models.Model):
+        name = models.CharField(max_length=255)
+        start = models.DateTimeField()
+        end = models.DateTimeField()
+
+        audit_log = AuditLog()
+
+        def __str__(self):
+            return self.name
+
+        class Meta:
+            ordering = [
+                '-end',
+                'name',
+            ]
+
+
+The ``Grant`` defines an allowance of ``Resources`` for a specific ``Project`` for a specific
+duration, but does not define what those resources are. The ``AllocationPool`` adds
+the resource pool used by the project over a specific time period (``AllocationPeriod``), and
+the ``Allocation`` defines what the allowance is for this resource pool.
 
 Usage model
 ~~~~~~~~~~~
-The aggregated usage table is designed to speed up access to usage information
+The aggregated ``Usage`` model is designed to speed up access to usage information
 by aggregating it into one table, as well as make it independent of the
 resource being monitored.
 
@@ -161,52 +419,52 @@ Example
 -------
 At a fictional site, we have the following machines:
 
-* MachineCategory { name: default }
-* Machine { name: brecca, machine_category: default }
-* Machine { name: tango, machine_category: default }
+* ``MachineCategory`` { name: default }
+* ``Machine`` { name: brecca, machine_category: default }
+* ``Machine`` { name: tango, machine_category: default }
 
 We define the following projects:
 
-* Project { pid: InstituteA }
-* Project { pid: InstituteB }
-* Project { pid: ProjectA, parent: InstituteA }
-* Project { pid: ProjectB, parent: InstituteA }
-* Project { pid: ProjectC, parent: InstituteC }
-* Project { pid: ProjectD, parent: ProjectC }
+* ``Project`` { pid: InstituteA }
+* ``Project`` { pid: InstituteB }
+* ``Project`` { pid: ProjectA, parent: InstituteA }
+* ``Project`` { pid: ProjectB, parent: InstituteA }
+* ``Project`` { pid: ProjectC, parent: InstituteC }
+* ``Project`` { pid: ProjectD, parent: ProjectC }
 
 This shows how the project hierarchy would work.
 
 We want to track disk space and CPU hours, so we define two resource pools.
 
-* ResourcePool { name: Disk Space }
-* ResourcePool { name: CPU Hours }
+* ``ResourcePool`` { name: Disk Space }
+* ``ResourcePool`` { name: CPU Hours }
 
 We define the following resources:
 
-* Resource { machine: brecca, resource_pool: Disk Space, quantity=??? }
-* Resource { machine: brecca, resource_pool: CPU Hours, quantity=??? }
-* Resource { machine: tango, resource_pool: Disk Space, quantity=??? }
-* Resource { machine: tango, resource_pool: CPU Hours, quantity=??? }
+* ``Resource`` { machine: brecca, resource_pool: Disk Space, quantity=??? }
+* ``Resource`` { machine: brecca, resource_pool: CPU Hours, quantity=??? }
+* ``Resource`` { machine: tango, resource_pool: Disk Space, quantity=??? }
+* ``Resource`` { machine: tango, resource_pool: CPU Hours, quantity=??? }
 
 For this fictional site, ET is the major sponsor, So we define the following
 scheme:
 
-* Scheme { name: ET, opened: 2100-01-01, closed=None }
+* ``Scheme`` { name: ET, opened: 2100-01-01, closed=None }
 
 ET has been generous enough to give Grants to various projects:
 
-* Grant { id: 1, project: ProjectA, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
-* Grant { id: 2, project: ProjectD, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
+* ``Grant`` { id: 1, project: ProjectA, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
+* ``Grant`` { id: 2, project: ProjectD, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
 
 At this stage we haven't defined the resources allocated for this project. Lets
 do that:
 
-* AllocationPool { id: 1, project: ProjectA, period: 2100, pool: Disk Space }
-* Allocation { grant: 1, allocation_pool: 1, quantity: 100KB }
-* Allocation { grant: 1, allocation_pool: 1, quantity: 500KB }
-* AllocationPool { id: 2, project: ProjectA, period: 2100, pool: CPU Hours }
-* Allocation { grant: 1, allocation_pool: 2, quantity: 10 }
-* Allocation { grant: 1, allocation_pool: 2, quantity: 50 }
+* ``AllocationPool`` { id: 1, project: ProjectA, period: 2100, pool: Disk Space }
+* ``Allocation`` { grant: 1, allocation_pool: 1, quantity: 100KB }
+* ``Allocation`` { grant: 1, allocation_pool: 1, quantity: 500KB }
+* ``AllocationPool`` { id: 2, project: ProjectA, period: 2100, pool: CPU Hours }
+* ``Allocation`` { grant: 1, allocation_pool: 2, quantity: 10 }
+* ``Allocation`` { grant: 1, allocation_pool: 2, quantity: 50 }
 
 Note that the two resource pools have different properties - CPU hours is
 accumulative and each new entry will add to the previous total. Where as with
@@ -219,6 +477,7 @@ Future work
 -----------
 Future technical changes required:
 
+* Some models don't use ``python_2_unicode_compatible``, this probably should be fixed.
 * Investigate proposed changes to groups, see if this can be improved on.
 * Import usage information into aggregated table.
 * Migration to put usage information in new aggregated table.
