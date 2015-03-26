@@ -91,7 +91,7 @@ This change means every group can only be used  by one ``Institute``, by one
 This makes sense because it simplifies the code, and it is typically an error condition
 to have one ``Group`` used in by different things.
 
-This change does not prevent a ``Group`` from being used by one ``one ``Institute``, by one
+This change does not prevent a ``Group`` from being used by one one ``Institute``, by one
 ``Project``, and by one piece of ``Software`` all at the same time. For that, see the proposed change,
 `Group Parent`_.
 
@@ -167,7 +167,7 @@ ProjectLevel model
         class Meta:
             ordering = ['level']
 
-The ``ProjectLevel`` table is required to indicate a `Persons` level within a `Project`.
+The ``ProjectLevel`` table is required to indicate a ``Persons`` level within a ``Project``.
 
 Git commits:
 
@@ -800,10 +800,11 @@ do that:
 
 Elliott decided to match these grants:
 
-* ``Grant`` { id: 3, project: ProjectA, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
-* ``Grant`` { id: 4, project: ProjectD, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
+* ``Scheme`` { name: Elliott, opened: 2100-01-01, closed=None }
+* ``Grant`` { id: 3, project: ProjectA, scheme: Elliott, begins: 2100-01-01, expires=2100-12-31 }
+* ``Grant`` { id: 4, project: ProjectD, scheme: Elliott, begins: 2100-01-01, expires=2100-12-31 }
 
-At this stage we already have the `AllocationPool`` these projects. So we just need to
+At this stage we already have the ``AllocationPool`` these projects. So we just need to
 define additional ``Allocations``:
 
 * ``Allocation`` { grant: 3, allocation_pool: 1, quantity: 500KB }
