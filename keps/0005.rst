@@ -306,6 +306,9 @@ ResourcePool model
 Karaage 4 supports tracking information other then CPU hours. This is done
 by defining a ``ResourcePool`` for every metric we want to track.
 
+All ``Resources`` in the resource pool should use the same units. So mixing Disk Space and
+CPU hours in the one ResourcePool is not valid.
+
 Proposed changes:
 
 * `ResourcePool enhancements`_.
@@ -739,6 +742,8 @@ disk space, we are more concerned about the maximum about of disk space used
 at any one time. There should perhaps be an extra field added to distinguish the
 two different cases.
 
+There should also be a property that defines the units used by this field.
+
 
 Example
 -------
@@ -813,6 +818,7 @@ in the current schema.
 Also note the following constraints:
 
 * allocation.allocation_pool.project == allocation.grant.project
+
 
 Future work
 -----------
