@@ -86,7 +86,14 @@ This has now been changed to:
 
 
 This change means every group can only be used  by one ``Institute``, by one
-``Project``, a nd by one piece of ``Software``.
+``Project``, a and by one piece of ``Software``.
+
+This makes sense because it simplifies the code, and it is typically an error condition
+to have one ``Group`` used in by different things.
+
+This change does not prevent a ``Group`` from being used by one ``one ``Institute``, by one
+``Project``, and by one piece of ``Software`` all at the same time. For that, see the proposed change,
+`Group Parent`_.
 
 Git commits:
 
@@ -96,9 +103,10 @@ Git commits:
 Use of Audit Log
 ~~~~~~~~~~~~~~~~
 The audit log plugin creates a duplicate database table for every model that
-records historic information for the models.  It's use may mean that adhoc
-methods used in Karaage to record historic information may not be required
-anymore, and should be refactored.
+records historic information for the models. 
+
+It's use may mean that adhoc methods used in Karaage to record historic information may not
+be required anymore, and should possibly be refactored.
 
 AuitLog has not yet been applied to the ``Person`` model.
 
@@ -106,7 +114,7 @@ Git commits:
 
 * `694b9224320bfd8a22aace60fc9f7c08dc2fbc6e <https://github.com/Karaage-Cluster/karaage/commit/694b9224320bfd8a22aace60fc9f7c08dc2fbc6e>`_
 * `8b7f0c7e61dbea679ecabe29a717156b2c0f62fc <https://github.com/Karaage-Cluster/karaage/commit/8b7f0c7e61dbea679ecabe29a717156b2c0f62fc>`_
-* + others
+* and others
 
 
 CareerLevel model
@@ -159,7 +167,7 @@ ProjectLevel model
         class Meta:
             ordering = ['level']
 
-The ``ProjectLevel`` table is required for ???.
+The ``ProjectLevel`` table is required to indicate a `Persons` level within a `Project`.
 
 Git commits:
 
@@ -209,7 +217,7 @@ ProjectMembership model
 
 
 The ``ProjectMembership`` table is required to keep track of additional information
-for every ``Person`` in a particular ``Project``, such as the ``ProjectLevel`` and the
+for every ``Person`` in a particular ``Project``. This includes the ``ProjectLevel`` and the
 person's role inside the project. A ``Person`` can be a supervisor or leader of a
 ``Project``. A ``Person`` can nominate a ``Project`` as a default project. A ``Person`` can
 be designated the primary contact for the ``Project``.
@@ -239,7 +247,7 @@ Project model
 
         ...
 
-The ``Project`` hierarchy, using MPTT, replaces the current ``Institute`` model. The top level
+The ``Project`` hierarchy, using the MPTT library. This basically, replaces the current ``Institute`` model, although this remains for now. The top level
 ``Projects`` would be the ``Institutes``, and the descendants the ``Projects`` belonging
 to these ``Institutes``. This means usage can be assigned to a ``Project``, and this
 will work even if the ``Project`` is an ``Institute``.
@@ -296,8 +304,11 @@ ResourcePool model
 
 
 Karaage 4 supports tracking information other then CPU hours. This is done
-by defining a ``ResourcePool`` for every metric we want to track. The ``Resource``
-model defines how we track this metric for a given ``Machine``.
+by defining a ``ResourcePool`` for every metric we want to track.
+
+Proposed changes:
+
+* `ResourcePool enhancements`_.
 
 Git commits:
 
@@ -344,10 +355,16 @@ Resource model
            ordering = ['resource_type']
 
 
-Karaage 4 supports tracking information other then CPU hours. This is done
-by defining a ``ResourcePool`` for every metric we want to track. The ``Resource``
-model defines how we track this metric for a given ``Machine``.
+The ``Resource`` model defines how we track a ``ResourcePool`` for a given ``Machine``.
 
+Notes:
+
+* The ``resource_type`` is set here, so a ``ResourcePool`` could have different types for
+  different ``Machines``.
+* Either find the  the purpose of the ``resource_type`` field or remove it.
+* Try to figure out the purpose of the quantity field. The quantity field cannot be NULL, and doesn't
+  appear to make sense for CPU Hours.
+    
 Git commits:
 
 * `0173243e1c0b7b8fccf44444b429a56b0c6825d8 <https://github.com/Karaage-Cluster/karaage/commit/0173243e1c0b7b8fccf44444b429a56b0c6825d8>`_
@@ -378,6 +395,9 @@ Grant model
                 'project__name',
                 'description',
             ]
+
+The ``Grant`` defines an allowance of ``Resources`` from a ``Scheme`` for a specific ``Project`` for a specific
+duration. It does not define what those resources are.
 
 Git commits:
 
@@ -442,6 +462,9 @@ AllocationPool model
                 'project__name',
             ]
 
+The ``AllocationPool`` defines a set of ``Allocations`` and maps them to a ``ResourcePool``.
+
+
 Git commits:
 
 * `9677dfb6f1ae37f19a1622a465ede9a9c8527635 <https://github.com/Karaage-Cluster/karaage/commit/9677dfb6f1ae37f19a1622a465ede9a9c8527635>`_
@@ -467,6 +490,13 @@ Allocation model
             ordering = [
                 'allocation_pool',
             ]
+
+The ``Allocation`` defines what the grant allocation is for this ``ResourcePool``.
+
+Notes:
+
+* Why not have ``Allocation`` point directly to a ``ResourcePool`` rather then indirectly via the
+  ``AllocationPool``? Is the ``AllocationPool`` really required?
 
 Git commits:
 
@@ -495,10 +525,7 @@ AllocationPeriod model
             ]
 
 
-The ``Grant`` defines an allowance of ``Resources`` for a specific ``Project`` for a specific
-duration, but does not define what those resources are. The ``AllocationPool`` adds
-the resource pool used by the project over a specific time period (``AllocationPeriod``), and
-the ``Allocation`` defines what the allowance is for this resource pool.
+Defines a period between two dates.
 
 Git commits:
 
@@ -541,6 +568,15 @@ allocation_mode attribute
     )
 
     ...
+
+Notes:
+
+* This is an important distinction I don't understand.
+* When job is submitted, we get the ``submitted_project``, however we need to get the ``allocated_project`` for
+  this job.
+* Check: If this project has an allocation, or if ``allocation_mode`` is private, or if there is no parent project
+  we use this project as the ``allocated_project``. Otherwise (``allocation_mode`` is shared) we look at the parent
+  project, and repeat the process.
 
 Git commits:
 
@@ -605,6 +641,15 @@ Usage model
 The aggregated ``Usage`` model is designed to speed up access to usage information
 by aggregating it into one table, as well as make it independent of the
 resource being monitored.
+
+Notes:
+
+* We do not keep track of the ``MachineCategory`` here. However we do keep track of the ``Machine``.
+* Is ``allocation_period`` really appropriate here???
+* What does ``project_institute`` point to? The ``submitted_project`` or the ``allocated_project``?
+* Should ``content_type`` get moved to the ``ResourcePool`` or ``Resource`` models?
+
+Git commits:
 
 * `c7d4ad0c7cd8abdab37d973f64aa127b21ba66f7 <https://github.com/Karaage-Cluster/karaage/commit/c7d4ad0c7cd8abdab37d973f64aa127b21ba66f7>`_
 
@@ -685,6 +730,15 @@ Gerrit change:
 * `1500 <https://code.vpac.org/gerrit/#/c/1500/>`_
 
 
+ResourcePool enhancements
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``ResourcePools`` can have two different sets of properties. e.g. CPU hours is
+accumulative and each new entry will add to the previous total. Where as with
+disk space, we are more concerned about the maximum about of disk space used
+at any one time. There should perhaps be an extra field added to distinguish the
+two different cases.
+
 
 Example
 -------
@@ -727,15 +781,28 @@ ET has been generous enough to give Grants to various projects:
 * ``Grant`` { id: 1, project: ProjectA, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
 * ``Grant`` { id: 2, project: ProjectD, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
 
+We define an ``AllocationPeriod``:
+
+* ``AllocationPeriod`` { name: "2100Q1", start: 2100-01-01, end: 2100-03-31 }
+
 At this stage we haven't defined the resources allocated for this project. Lets
 do that:
 
-* ``AllocationPool`` { id: 1, project: ProjectA, period: 2100, pool: Disk Space }
+* ``AllocationPool`` { name: "Q1PA", id: 1, project: ProjectA, period: 2100Q1, pool: Disk Space }
 * ``Allocation`` { grant: 1, allocation_pool: 1, quantity: 100KB }
-* ``Allocation`` { grant: 1, allocation_pool: 1, quantity: 500KB }
-* ``AllocationPool`` { id: 2, project: ProjectA, period: 2100, pool: CPU Hours }
-* ``Allocation`` { grant: 1, allocation_pool: 2, quantity: 10 }
-* ``Allocation`` { grant: 1, allocation_pool: 2, quantity: 50 }
+* ``AllocationPool`` { name: "Q1PD", id: 2, project: ProjectD, period: 2100Q1, pool: CPU Hours }
+* ``Allocation`` { grant: 2, allocation_pool: 2, quantity: 10 }
+
+Elliott decided to match these grants:
+
+* ``Grant`` { id: 3, project: ProjectA, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
+* ``Grant`` { id: 4, project: ProjectD, scheme: ET, begins: 2100-01-01, expires=2100-12-31 }
+
+At this stage we already have the `AllocationPool`` these projects. So we just need to
+define additional ``Allocations``:
+
+* ``Allocation`` { grant: 3, allocation_pool: 1, quantity: 500KB }
+* ``Allocation`` { grant: 4, allocation_pool: 2, quantity: 50 }
 
 Note that the two resource pools have different properties - CPU hours is
 accumulative and each new entry will add to the previous total. Where as with
@@ -743,9 +810,13 @@ disk space, we are more concerned about the maximum about of disk space used
 at any one time. The distinction between these two formats has not been made
 in the current schema.
 
+Also note the following constraints:
+
+* allocation.allocation_pool.project == allocation.grant.project
+
 Future work
 -----------
-Future technical changes required:
+Future changes required:
 
 * Some models don't use ``python_2_unicode_compatible``, this probably should be fixed.
 * Investigate proposed changes to groups, see if this can be improved on.
@@ -753,8 +824,9 @@ Future technical changes required:
 * Migration to put usage information in new aggregated table.
 * Rewrite usage plugin. New plugin should be able to graph data from multiple
   sources, e.g. CPU time and disk space.
+* Write/complete user documentation.
 
-Funding issues:
+Management changes:
 
 * It has been suggested that a way forward would be to make Karaage
   proprietary. However Karaage has always been Open Source software and has had
