@@ -88,12 +88,12 @@ This has now been changed to:
 This change means every group can only be used  by one ``Institute``, by one
 ``Project``, a and by one piece of ``Software``.
 
-This makes sense because it simplifies the code, and it is typically an error condition
-to have one ``Group`` used in by different things.
+This makes sense because it simplifies the code, and it is typically an error
+condition to have one ``Group`` used in by different things.
 
-This change does not prevent a ``Group`` from being used by one one ``Institute``, by one
-``Project``, and by one piece of ``Software`` all at the same time. For that, see the proposed change,
-`Group Parent`_.
+This change does not prevent a ``Group`` from being used by one one
+``Institute``, by one ``Project``, and by one piece of ``Software`` all at the
+same time. For that, see the proposed change, `Group Parent`_.
 
 Git commits:
 
@@ -105,8 +105,8 @@ Use of Audit Log
 The audit log plugin creates a duplicate database table for every model that
 records historic information for the models. 
 
-It's use may mean that adhoc methods used in Karaage to record historic information may not
-be required anymore, and should possibly be refactored.
+It's use may mean that adhoc methods used in Karaage to record historic
+information may not be required anymore, and should possibly be refactored.
 
 AuitLog has not yet been applied to the ``Person`` model.
 
@@ -216,11 +216,12 @@ ProjectMembership model
 
 
 
-The ``ProjectMembership`` table is required to keep track of additional information
-for every ``Person`` in a particular ``Project``. This includes the ``ProjectLevel`` and the
-person's role inside the project. A ``Person`` can be a supervisor or leader of a
-``Project``. A ``Person`` can nominate a ``Project`` as a default project. A ``Person`` can
-be designated the primary contact for the ``Project``.
+The ``ProjectMembership`` table is required to keep track of additional
+information for every ``Person`` in a particular ``Project``. This includes the
+``ProjectLevel`` and the person's role inside the project. A ``Person`` can be
+a supervisor or leader of a ``Project``. A ``Person`` can nominate a
+``Project`` as a default project. A ``Person`` can be designated the primary
+contact for the ``Project``.
 
 Git commits:
 
@@ -247,10 +248,11 @@ Project model
 
         ...
 
-The ``Project`` hierarchy, using the MPTT library. This basically, replaces the current ``Institute`` model, although this remains for now. The top level
-``Projects`` would be the ``Institutes``, and the descendants the ``Projects`` belonging
-to these ``Institutes``. This means usage can be assigned to a ``Project``, and this
-will work even if the ``Project`` is an ``Institute``.
+The ``Project`` hierarchy, using the MPTT library. This basically, replaces the
+current ``Institute`` model, although this remains for now. The top level
+``Projects`` would be the ``Institutes``, and the descendants the ``Projects``
+belonging to these ``Institutes``. This means usage can be assigned to a
+``Project``, and this will work even if the ``Project`` is an ``Institute``.
 
 Git commits:
 
@@ -306,8 +308,8 @@ ResourcePool model
 Karaage 4 supports tracking information other then CPU hours. This is done
 by defining a ``ResourcePool`` for every metric we want to track.
 
-All ``Resources`` in the resource pool should use the same units. So mixing Disk Space and
-CPU hours in the one ResourcePool is not valid.
+All ``Resources`` in the resource pool should use the same units. So mixing
+Disk Space and CPU hours in the one ResourcePool is not valid.
 
 Proposed changes:
 
@@ -358,16 +360,17 @@ Resource model
            ordering = ['resource_type']
 
 
-The ``Resource`` model defines how we track a ``ResourcePool`` for a given ``Machine``.
+The ``Resource`` model defines how we track a ``ResourcePool`` for a given
+``Machine``.
 
 Notes:
 
-* The ``resource_type`` is set here, so a ``ResourcePool`` could have different types for
-  different ``Machines``.
+* The ``resource_type`` is set here, so a ``ResourcePool`` could have different
+  types for different ``Machines``.
 * Either find the  the purpose of the ``resource_type`` field or remove it.
-* Try to figure out the purpose of the quantity field. The quantity field cannot be NULL, and doesn't
-  appear to make sense for CPU Hours.
-    
+* Try to figure out the purpose of the quantity field. The quantity field
+  cannot be NULL, and doesn't appear to make sense for CPU Hours.
+
 Git commits:
 
 * `0173243e1c0b7b8fccf44444b429a56b0c6825d8 <https://github.com/Karaage-Cluster/karaage/commit/0173243e1c0b7b8fccf44444b429a56b0c6825d8>`_
@@ -399,8 +402,9 @@ Grant model
                 'description',
             ]
 
-The ``Grant`` defines an allowance of ``Resources`` from a ``Scheme`` for a specific ``Project`` for a specific
-duration. It does not define what those resources are.
+The ``Grant`` defines an allowance of ``Resources`` from a ``Scheme`` for a
+specific ``Project`` for a specific duration. It does not define what those
+resources are.
 
 Git commits:
 
@@ -465,7 +469,8 @@ AllocationPool model
                 'project__name',
             ]
 
-The ``AllocationPool`` defines a set of ``Allocations`` and maps them to a ``ResourcePool``.
+The ``AllocationPool`` defines a set of ``Allocations`` and maps them to a
+``ResourcePool``.
 
 
 Git commits:
@@ -498,8 +503,9 @@ The ``Allocation`` defines what the grant allocation is for this ``ResourcePool`
 
 Notes:
 
-* Why not have ``Allocation`` point directly to a ``ResourcePool`` rather then indirectly via the
-  ``AllocationPool``? Is the ``AllocationPool`` really required?
+* Why not have ``Allocation`` point directly to a ``ResourcePool`` rather then
+  indirectly via the ``AllocationPool``? Is the ``AllocationPool`` really
+  required?
 
 Git commits:
 
@@ -575,11 +581,12 @@ allocation_mode attribute
 Notes:
 
 * This is an important distinction I don't understand.
-* When job is submitted, we get the ``submitted_project``, however we need to get the ``allocated_project`` for
-  this job.
-* Check: If this project has an allocation, or if ``allocation_mode`` is private, or if there is no parent project
-  we use this project as the ``allocated_project``. Otherwise (``allocation_mode`` is shared) we look at the parent
-  project, and repeat the process.
+* When job is submitted, we get the ``submitted_project``, however we need to
+  get the ``allocated_project`` for this job.
+* Check: If this project has an allocation, or if ``allocation_mode`` is
+  private, or if there is no parent project we use this project as the
+  ``allocated_project``. Otherwise (``allocation_mode`` is shared) we look at
+  the parent project, and repeat the process.
 
 Git commits:
 
@@ -641,16 +648,19 @@ Usage model
         def __str__(self):
             return self.description
 
-The aggregated ``Usage`` model is designed to speed up access to usage information
-by aggregating it into one table, as well as make it independent of the
-resource being monitored.
+The aggregated ``Usage`` model is designed to speed up access to usage
+information by aggregating it into one table, as well as make it independent of
+the resource being monitored.
 
 Notes:
 
-* We do not keep track of the ``MachineCategory`` here. However we do keep track of the ``Machine``.
+* We do not keep track of the ``MachineCategory`` here. However we do keep
+  track of the ``Machine``.
 * Is ``allocation_period`` really appropriate here???
-* What does ``project_institute`` point to? The ``submitted_project`` or the ``allocated_project``?
-* Should ``content_type`` get moved to the ``ResourcePool`` or ``Resource`` models?
+* What does ``project_institute`` point to? The ``submitted_project`` or the
+  ``allocated_project``?
+* Should ``content_type`` get moved to the ``ResourcePool`` or ``Resource``
+  models?
 
 Git commits:
 
@@ -697,7 +707,7 @@ Group Parent
 .. code-block::
 
     class Group(models.Model):
- 
+
         """
         Groups represent collections of people, these objects can be
         expressed externally in a datastore.
@@ -717,14 +727,20 @@ Group Parent
         content_type = models.ForeignKey(ContentType, blank=True, null=True)
         object_id = models.PositiveIntegerField(blank=True, null=True)
         parent = GenericForeignKey('content_type', 'object_id')
-        
-This is a series of changes dependant based on the first change which adds a parent field from every group to the object that used it. This duplicates the OneToOneField as described in `Unique Groups`_.
+
+        ...
+
+This is a series of changes dependant based on the first change which adds a
+parent field from every group to the object that used it. This duplicates the
+OneToOneField as described in `Unique Groups`_.
 
 In turn, this allows creating groups and picking a unique name automatically.
 
-It also allows code to generate an error if the user attempts to modify the groups directly instead of via the appropriate interface for the parent.
+It also allows code to generate an error if the user attempts to modify the
+groups directly instead of via the appropriate interface for the parent.
 
-While these are required changes, work needs to be done to see if the same results can be achieved without duplication of the data in the database.
+While these are required changes, work needs to be done to see if the same
+results can be achieved without duplication of the data in the database.
 
 Gerrit change:
 
@@ -736,11 +752,11 @@ Gerrit change:
 ResourcePool enhancements
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``ResourcePools`` can have two different sets of properties. e.g. CPU hours is
-accumulative and each new entry will add to the previous total. Where as with
-disk space, we are more concerned about the maximum about of disk space used
-at any one time. There should perhaps be an extra field added to distinguish the
-two different cases.
+The ``ResourcePools`` can have two different sets of properties. e.g. CPU hours
+is accumulative and each new entry will add to the previous total. Where as
+with disk space, we are more concerned about the maximum about of disk space
+used at any one time. There should perhaps be an extra field added to
+distinguish the two different cases.
 
 There should also be a property that defines the units used by this field.
 
