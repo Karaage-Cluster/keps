@@ -841,7 +841,6 @@ Future work
 -----------
 Future changes required:
 
-* Some models don't use ``python_2_unicode_compatible``, this probably should be fixed.
 * Investigate proposed changes to groups, see if this can be improved on.
 * Import usage information into aggregated table.
 * Migration to put usage information in new aggregated table.
