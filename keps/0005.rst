@@ -133,6 +133,7 @@ CareerLevel model
 
         class Meta:
             ordering = ['level']
+            app_label = 'karaage'
 
     @python_2_unicode_compatible
     class Person(AbstractBaseUser):
@@ -166,6 +167,7 @@ ProjectLevel model
 
         class Meta:
             ordering = ['level']
+            app_label = 'karaage'
 
 The ``ProjectLevel`` table is required to indicate a ``Persons`` level within a ``Project``.
 
@@ -200,6 +202,12 @@ ProjectMembership model
         is_project_leader = models.BooleanField(default=False)
         is_default_project = models.BooleanField(default=False)
         is_primary_contact = models.BooleanField(default=False)
+
+        class Meta:
+            app_label = 'karaage'
+            unique_together = (
+                'person', 'project',
+            )
 
         def __str__(self):
             return '{} @ {}'.format(self.person, self.project)
@@ -280,6 +288,7 @@ Schemes model
 
         class Meta:
             ordering = ['name']
+            app_label = 'karaage'
 
 The ``Scheme`` defines a source of grants over a specific period of time.
 
@@ -303,6 +312,7 @@ ResourcePool model
 
         class Meta:
             ordering = ['name']
+            app_label = 'karaage'
 
 
 Karaage 4 supports tracking information other then CPU hours. This is done
@@ -358,6 +368,7 @@ Resource model
 
         class Meta:
            ordering = ['resource_type']
+            app_label = 'karaage'
 
 
 The ``Resource`` model defines how we track a ``ResourcePool`` for a given
@@ -401,6 +412,7 @@ Grant model
                 'project__name',
                 'description',
             ]
+            app_label = 'karaage'
 
 The ``Grant`` defines an allowance of ``Resources`` from a ``Scheme`` for a
 specific ``Project`` for a specific duration. It does not define what those
@@ -468,6 +480,7 @@ AllocationPool model
                 '-project__end_date',
                 'project__name',
             ]
+            app_label = 'karaage'
 
 The ``AllocationPool`` defines a set of ``Allocations`` and maps them to a
 ``ResourcePool``.
@@ -498,6 +511,7 @@ Allocation model
             ordering = [
                 'allocation_pool',
             ]
+            app_label = 'karaage'
 
 The ``Allocation`` defines what the grant allocation is for this ``ResourcePool``.
 
@@ -532,6 +546,7 @@ AllocationPeriod model
                 '-end',
                 'name',
             ]
+            app_label = 'karaage'
 
 
 Defines a period between two dates.
@@ -648,19 +663,69 @@ Usage model
         def __str__(self):
             return self.description
 
+        class Meta:
+            # Not using ordering so database planner is free to pick the
+            # rows as they come.
+            app_label = 'karaage'
+            unique_together = (
+                'range_start', 'range_end',
+                'account', 'machine', 'submitted_project')
+
+
 The aggregated ``Usage`` model is designed to speed up access to usage
 information by aggregating it into one table, as well as make it independent of
 the resource being monitored.
 
 Notes:
 
+* ``range_start`` and ``range_end`` are ``DateTime`` not just ``Date``.
+* Should have a ``range_duration`` attribute?
 * We do not keep track of the ``MachineCategory`` here. However we do keep
   track of the ``Machine``.
 * Is ``allocation_period`` really appropriate here???
-* What does ``project_institute`` point to? The ``submitted_project`` or the
-  ``allocated_project``?
+* What does ``project_institute`` point to? The ``submitted_project``.
 * Should ``content_type`` get moved to the ``ResourcePool`` or ``Resource``
   models?
+* It is not possible to set ``content_type`` from within migrations, due to
+  Django limitations.
+* Have we got too much de-normalization?
+
+  * ``person_project_level``
+  * ``person_career_level``
+
+  Do we really care what these values were at the time the job was run,
+  as opposed to now?
+* These attributes should be part of the ``unique_together`` attribute.
+
+  * ``person_project_level``
+  * ``person_career_level``
+  * ``person_institute``
+  * ``project_institute``
+
+  As these values could change within the same day.
+* These attributes don't need to be part of the ``unique_together`` attribute
+  but could be:
+
+  * ``person`` - as the ``Person`` associated with an ``Account`` will never
+    change.
+  * ``resource_pool`` - calculated from other values.
+  * ``resource`` - calculated from other values.
+  * ``scheme`` - calculated from other values.
+  * ``allocation_pool``  - calculated from other values.
+  * ``allocation_period``  - calculated from other values.
+
+* We cannot automatically generate a ``scheme``, ``allocation_pool`` and
+  ``allocation_period`` objects on upgrade that would make sense for all
+  installs.
+* Do we really want to assign the record to an ``allocation_pool`` when
+  recorded? If there are multiple ``allocation_pools`` that are valid, which
+  one should we use? Or would it be better to assign it to ``allocation_pools``
+  later when displaying the data?
+* Recording the ``scheme`` here makes no sense. An ``AllocationPool`` can have
+  multiple ``Allocations``, each ``Allocation`` from a different ``Grant``.
+  Each ``Grant`` can have a different ``Scheme``. We can only record one
+  ``scheme`` however.
+* What is the point of ``description``?????
 
 Git commits:
 
