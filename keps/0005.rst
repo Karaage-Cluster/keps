@@ -825,6 +825,11 @@ distinguish the two different cases.
 
 There should also be a property that defines the units used by this field.
 
+CPUJob model
+~~~~~~~~~~~~
+Once the `Usage model`_ is finalized, the fields in the ``CPUJob`` model
+need to be revised.
+
 
 Example
 -------
