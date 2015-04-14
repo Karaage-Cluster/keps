@@ -110,6 +110,10 @@ information may not be required anymore, and should possibly be refactored.
 
 AuitLog has not yet been applied to the ``Person`` model.
 
+Proposed changes:
+
+* Add AuditLog to the ``Person`` model.
+
 Git commits:
 
 * `694b9224320bfd8a22aace60fc9f7c08dc2fbc6e <https://github.com/Karaage-Cluster/karaage/commit/694b9224320bfd8a22aace60fc9f7c08dc2fbc6e>`_
@@ -147,6 +151,10 @@ CareerLevel model
 
 The ``CareerLevel`` table is used to specify the job title of the Person.
 
+Proposed changes:
+
+* Set unique=True on ``level``.
+
 Git commits:
 
 * `5558119d155de9e3629c6940adb84f25c9920aac <https://github.com/Karaage-Cluster/karaage/commit/5558119d155de9e3629c6940adb84f25c9920aac>`_
@@ -169,7 +177,12 @@ ProjectLevel model
             ordering = ['level']
             app_label = 'karaage'
 
-The ``ProjectLevel`` table is required to indicate a ``Persons`` level within a ``Project``.
+The ``ProjectLevel`` table is required to indicate a ``Persons`` level within a
+``Project``.
+
+Proposed changes:
+
+* Set unique=True on ``level``.
 
 Git commits:
 
@@ -323,7 +336,16 @@ Disk Space and CPU hours in the one ResourcePool is not valid.
 
 Proposed changes:
 
-* `ResourcePool enhancements`_.
+* The ``ResourcePools`` can have two different sets of properties. e.g. CPU
+  hours is accumulative and each new entry will add to the previous total.
+  Where as with disk space, we are more concerned about the maximum about of
+  disk space used at any one time. There should perhaps be an extra field added
+  to distinguish the two different cases.
+
+* There should also be a property that defines the units used by this field.
+
+* Property that defines the single type of all the ``Resources`` in this pool.
+  e.g. Disk Space or Memory Usage or CPU Usage.
 
 Git commits:
 
@@ -380,9 +402,18 @@ Notes:
   types for different ``Machines``.
 * Either find the  the purpose of the ``resource_type`` field or remove it.
 * The quantity field should allow NULL, it doesn't make sense for CPU Hours.
+* A single ``machine`` could have multiple Resources for one ``resource_pool``,
+  e.g. multiple filesystems.
+
+Proposed changes:
+
+* Quantity can be NULL.
+* Remove ``resource_type`` field.
+* Add ``resource_name`` field.
 * These attributes should be part of the ``unique_together`` attribute.
 
   * ``resource_pool``
+  * ``resource_name``
   * ``machine``
 
 Git commits:
@@ -423,13 +454,8 @@ resources are.
 
 Notes:
 
-* Maybe these attributes should be part of the ``unique_together``
-  attribute????
-
-  * ``project``
-  * ``scheme``
-  * ``begins``
-
+* Although strange, it is possible to have multiple grants from the same
+  ``scheme`` for the same ``project`` at overlapping times.
 
 Git commits:
 
@@ -499,9 +525,9 @@ The ``AllocationPool`` defines a ledger containing ``Allocations`` and
 ``Usage`` entries for a particular ``ResourcePool`` and provides methods for
 working out totals.
 
-Notes:
+Proposed changes:
 
-* Should these attributes should be part of the ``unique_together`` attribute?
+* Set ``unique_together`` to:
 
   * ``project``
   * ``period``
@@ -570,7 +596,7 @@ AllocationPeriod model
 
 Defines a period between two dates.
 
-Notes:
+Proposed change:
 
 * Name should have unique=True set.
 
@@ -701,15 +727,10 @@ the resource being monitored.
 
 Notes:
 
-* ``range_start`` and ``range_end`` are ``DateTime`` not just ``Date``.
 * Should have a ``range_duration`` attribute?
 * We do not keep track of the ``MachineCategory`` here. However we do keep
   track of the ``Machine``.
 * What does ``project_institute`` point to? The ``submitted_project``.
-* Should ``content_type`` get moved to the ``ResourcePool`` or ``Resource``
-  models?
-* It is not possible to set ``content_type`` from within migrations, due to
-  Django limitations.
 * Have we got too much de-normalization?
 
   * ``person_project_level``
@@ -718,17 +739,10 @@ Notes:
   * ``project_institute``
 
   Do we really care what these values were at the time the job was run,
-  as opposed to now?
-* These attributes should be part of the ``unique_together`` attribute.
+  as opposed to now? Answer: YES! We want to be able to search usage
+  based on these attributes.
 
-  * ``person_project_level``
-  * ``person_career_level``
-  * ``person_institute``
-  * ``project_institute``
-
-  As these values could change within the same day.
-* These attributes don't need to be part of the ``unique_together`` attribute
-  but could be:
+* These attributes don't need to be part of the ``unique_together`` attribute:
 
   * ``person`` - as the ``Person`` associated with an ``Account`` will never
     change.
@@ -738,16 +752,49 @@ Notes:
   * ``allocation_pool``  - calculated from ``allocated_project``.
   * ``allocation_period``  - calculated from ``allocation_pool``
 
-* The ``scheme`` field should get removed. We cannot automatically generate a
-  ``scheme``, ``allocation_pool`` and ``allocation_period`` objects on upgrade
-  that would make sense for all installs.
+Proposed changes:
+
+* Change ``range_start`` and ``range_end`` to ``Date`` fields.
+* Move the ``content_type`` to the ``ResourcePool`` model.
+
+* Disable automatic migration of data. Have migration triggered manually
+  *after* upgrade to Karaage 1.4. This is because:
+
+  * It is not possible to set ``content_type`` from within migrations, due to
+    Django limitations.
+  * We cannot automatically generate a ``scheme``, ``allocation_pool`` and
+    ``allocation_period`` objects on upgrade that would make sense for all
+    installs.
+
+* These attributes should added to the ``unique_together`` attribute.
+
+  * ``person_project_level``
+  * ``person_career_level``
+  * ``person_institute``
+  * ``project_institute``
+
+  As these values could change within the same day.
+
+* Remove ``scheme`` field should get removed. Recording the ``scheme`` here
+  makes no sense. An ``AllocationPool`` can have multiple ``Allocations``.
+  Which ``Allocations`` were used for this record?  Each ``Allocation`` has a
+  different ``Grant``.  Each ``Grant`` can have a different ``Scheme``. We can
+  only record one ``scheme`` however.
+
+* Remove the ``description`` field.
+
+Future work:
+
+* How do we get these attributes? Do we need to de-normalize the ``CPUJob``
+  tables too? How do we get these attributes when filling in the ``CPUJob``
+  table? Will audit log provide us with this historic information?
+  Currently the ``Person`` table doesn't have audit log enabled, required
+  for ``person_institute`` and ``person_career_level``.
+
 * We need to work out algorithm to get ``allocated_project`` from
-  ``submitted_project``.
-* Recording the ``scheme`` here makes no sense. An ``AllocationPool`` can have
-  multiple ``Allocations``, each ``Allocation`` from a different ``Grant``.
-  Each ``Grant`` can have a different ``Scheme``. We can only record one
-  ``scheme`` however.
-* What is the point of ``description``?????
+  ``submitted_project``. See discussion under `allocation_mode attribute`_.
+
+* We need to work out how to relate Schemes to Usage.
 
 Git commits:
 
@@ -781,7 +828,14 @@ PublicNotes model
         class Meta:
             ordering = ['-when']
 
-This needs a use case.
+
+The idea of this table is to record *important* changes to the object
+that is available to everyone who can see the object, not just administrators.
+
+A better solution might be to define certain log entries as *important* and
+allow everyone to view these log entries.
+
+At present time only administrators can view the log list.
 
 Gerrit change:
 
@@ -836,21 +890,10 @@ Gerrit change:
 * `1500 <https://code.vpac.org/gerrit/#/c/1500/>`_
 
 
-ResourcePool enhancements
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The ``ResourcePools`` can have two different sets of properties. e.g. CPU hours
-is accumulative and each new entry will add to the previous total. Where as
-with disk space, we are more concerned about the maximum about of disk space
-used at any one time. There should perhaps be an extra field added to
-distinguish the two different cases.
-
-There should also be a property that defines the units used by this field.
-
 CPUJob model
 ~~~~~~~~~~~~
 Once the `Usage model`_ is finalized, the fields in the ``CPUJob`` model
-need to be revised.
+may need to be revised. Do we de-normalize the fields?
 
 
 Example
