@@ -368,7 +368,7 @@ Resource model
 
         class Meta:
            ordering = ['resource_type']
-            app_label = 'karaage'
+           app_label = 'karaage'
 
 
 The ``Resource`` model defines how we track a ``ResourcePool`` for a given
@@ -379,8 +379,11 @@ Notes:
 * The ``resource_type`` is set here, so a ``ResourcePool`` could have different
   types for different ``Machines``.
 * Either find the  the purpose of the ``resource_type`` field or remove it.
-* Try to figure out the purpose of the quantity field. The quantity field
-  cannot be NULL, and doesn't appear to make sense for CPU Hours.
+* The quantity field should allow NULL, it doesn't make sense for CPU Hours.
+* These attributes should be part of the ``unique_together`` attribute.
+
+  * ``resource_pool``
+  * ``machine``
 
 Git commits:
 
@@ -417,6 +420,16 @@ Grant model
 The ``Grant`` defines an allowance of ``Resources`` from a ``Scheme`` for a
 specific ``Project`` for a specific duration. It does not define what those
 resources are.
+
+Notes:
+
+* Maybe these attributes should be part of the ``unique_together``
+  attribute????
+
+  * ``project``
+  * ``scheme``
+  * ``begins``
+
 
 Git commits:
 
@@ -482,9 +495,20 @@ AllocationPool model
             ]
             app_label = 'karaage'
 
-The ``AllocationPool`` defines a set of ``Allocations`` and maps them to a
-``ResourcePool``.
+The ``AllocationPool`` defines a ledger containing ``Allocations`` and
+``Usage`` entries for a particular ``ResourcePool`` and provides methods for
+working out totals.
 
+Notes:
+
+* Should these attributes should be part of the ``unique_together`` attribute?
+
+  * ``project``
+  * ``period``
+  * ``resource_pool``
+
+  i.e. is it an acceptable constraint that there is only one ``AllocationPool``
+  for every ``Project`` for a given ``AllocationPeriod`` and ``ResourcePool``.
 
 Git commits:
 
@@ -513,13 +537,8 @@ Allocation model
             ]
             app_label = 'karaage'
 
-The ``Allocation`` defines what the grant allocation is for this ``ResourcePool``.
-
-Notes:
-
-* Why not have ``Allocation`` point directly to a ``ResourcePool`` rather then
-  indirectly via the ``AllocationPool``? Is the ``AllocationPool`` really
-  required?
+The ``Allocation`` defines an entry in a ``AllocationPool`` ledger that
+adds to the available value.
 
 Git commits:
 
@@ -550,6 +569,10 @@ AllocationPeriod model
 
 
 Defines a period between two dates.
+
+Notes:
+
+* Name should have unique=True set.
 
 Git commits:
 
@@ -682,7 +705,6 @@ Notes:
 * Should have a ``range_duration`` attribute?
 * We do not keep track of the ``MachineCategory`` here. However we do keep
   track of the ``Machine``.
-* Is ``allocation_period`` really appropriate here???
 * What does ``project_institute`` point to? The ``submitted_project``.
 * Should ``content_type`` get moved to the ``ResourcePool`` or ``Resource``
   models?
@@ -692,6 +714,8 @@ Notes:
 
   * ``person_project_level``
   * ``person_career_level``
+  * ``person_institute``
+  * ``project_institute``
 
   Do we really care what these values were at the time the job was run,
   as opposed to now?
@@ -708,19 +732,17 @@ Notes:
 
   * ``person`` - as the ``Person`` associated with an ``Account`` will never
     change.
-  * ``resource_pool`` - calculated from other values.
-  * ``resource`` - calculated from other values.
-  * ``scheme`` - calculated from other values.
-  * ``allocation_pool``  - calculated from other values.
-  * ``allocation_period``  - calculated from other values.
+  * ``resource_pool`` - calculated based on source of data.
+  * ``resource`` - calculated from ``resource`` and ``machine``.
+  * ``allocated_project`` - calculated from ``submitted_project``.
+  * ``allocation_pool``  - calculated from ``allocated_project``.
+  * ``allocation_period``  - calculated from ``allocation_pool``
 
-* We cannot automatically generate a ``scheme``, ``allocation_pool`` and
-  ``allocation_period`` objects on upgrade that would make sense for all
-  installs.
-* Do we really want to assign the record to an ``allocation_pool`` when
-  recorded? If there are multiple ``allocation_pools`` that are valid, which
-  one should we use? Or would it be better to assign it to ``allocation_pools``
-  later when displaying the data?
+* The ``scheme`` field should get removed. We cannot automatically generate a
+  ``scheme``, ``allocation_pool`` and ``allocation_period`` objects on upgrade
+  that would make sense for all installs.
+* We need to work out algorithm to get ``allocated_project`` from
+  ``submitted_project``.
 * Recording the ``scheme`` here makes no sense. An ``AllocationPool`` can have
   multiple ``Allocations``, each ``Allocation`` from a different ``Grant``.
   Each ``Grant`` can have a different ``Scheme``. We can only record one
@@ -880,9 +902,12 @@ At this stage we haven't defined the resources allocated for this project. Lets
 do that:
 
 * ``AllocationPool`` { name: "Q1PA", id: 1, project: ProjectA, period: 2100Q1, pool: Disk Space }
-* ``Allocation`` { grant: 1, allocation_pool: 1, quantity: 100KB }
+
+  * ``Allocation`` { grant: 1, allocation_pool: 1, quantity: 100KB }
+
 * ``AllocationPool`` { name: "Q1PD", id: 2, project: ProjectD, period: 2100Q1, pool: CPU Hours }
-* ``Allocation`` { grant: 2, allocation_pool: 2, quantity: 10 }
+
+   * ``Allocation`` { grant: 2, allocation_pool: 2, quantity: 10 }
 
 Elliott decided to match these grants:
 
@@ -901,6 +926,40 @@ accumulative and each new entry will add to the previous total. Where as with
 disk space, we are more concerned about the maximum about of disk space used
 at any one time. The distinction between these two formats has not been made
 in the current schema.
+
+After some usage, the ``AllocationPools`` might look like this:
+
+* ``AllocationPool`` { name: "Q1PA", id: 1, project: ProjectA, period: 2100Q1, pool: Disk Space }
+
+  * ``Allocation`` { grant: 1, allocation_pool: 1, quantity: 100KB }
+  * ``Allocation`` { grant: 3, allocation_pool: 1, quantity: 500KB }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-01", quantity: 0KB }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-02", quantity: 100KB }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-03", quantity: 100KB }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-04", quantity: 100KB }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-05", quantity: 100KB }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-06", quantity: 100KB }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-07", quantity: 100KB }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-08", quantity: 100KB }
+
+  Note this ``Project`` has not exceeded the the 600KB quota despite the fact
+  7*100KB = 700KB, as here the maximum value matters, not the total.
+
+* ``AllocationPool`` { name: "Q1PD", id: 2, project: ProjectD, period: 2100Q1, pool: CPU Hours }
+
+  * ``Allocation`` { grant: 2, allocation_pool: 2, quantity: 10 }
+  * ``Allocation`` { grant: 4, allocation_pool: 2, quantity: 50 }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-01", quantity: 0 }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-02", quantity: 100 }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-03", quantity: 100 }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-04", quantity: 100 }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-05", quantity: 100 }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-06", quantity: 100 }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-07", quantity: 100 }
+  * ``Usage`` { allocation_pool: 1, range_start="2100-01-08", quantity: 100 }
+
+  In this case, the allocated quota of 60 has definitely been exceeded, as the
+  total usage is 700.
 
 Also note the following constraints:
 
