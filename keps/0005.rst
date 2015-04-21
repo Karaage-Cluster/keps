@@ -334,7 +334,7 @@ by defining a ``ResourcePool`` for every metric we want to track.
 All ``Resources`` in the resource pool should use the same units. So mixing
 Disk Space and CPU hours in the one ResourcePool is not valid.
 
-Proposed changes:
+Notes:
 
 * The ``ResourcePools`` can have two different sets of properties. e.g. CPU
   hours is accumulative and each new entry will add to the previous total.
@@ -342,10 +342,13 @@ Proposed changes:
   disk space used at any one time. There should perhaps be an extra field added
   to distinguish the two different cases.
 
-* There should also be a property that defines the units used by this field.
+Proposed changes:
 
-* Property that defines the single type of all the ``Resources`` in this pool.
-  e.g. Disk Space or Memory Usage or CPU Usage.
+* Add ``resource-units`` field. This can be, ``megabytes`` and ``CPU Hours``.
+  More units can be added later.
+* Add ``resource_function`` field. This can be set to ``average``, ``minimum``,
+  ``maximum``, ``last``, and ``sum``. For example with disk space it would be
+  ``maximum`` and for cpu usage it would be ``sum``.
 
 Git commits:
 
@@ -409,7 +412,6 @@ Proposed changes:
 
 * Quantity can be NULL.
 * Remove ``resource_type`` field.
-* Add ``resource_name`` field.
 * These attributes should be part of the ``unique_together`` attribute.
 
   * ``resource_pool``
