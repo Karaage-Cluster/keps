@@ -813,7 +813,7 @@ with the rationale as to why the changes have been considered a good idea.
 PublicNotes model
 ~~~~~~~~~~~~~~~~~
 
-.. code-block::
+.. code-block:: python
 
     @python_2_unicode_compatible
     class PublicNotes(models.Model):
@@ -847,7 +847,7 @@ Gerrit change:
 Group Parent
 ~~~~~~~~~~~~
 
-.. code-block::
+.. code-block:: python
 
     class Group(models.Model):
 
