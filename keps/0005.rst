@@ -754,19 +754,20 @@ Notes:
   * ``allocation_pool``  - calculated from ``allocated_project``.
   * ``allocation_period``  - calculated from ``allocation_pool``
 
-Proposed changes:
-
-* Change ``range_start`` and ``range_end`` to ``Date`` fields.
-* Move the ``content_type`` to the ``ResourcePool`` model.
-
-* Disable automatic migration of data. Have migration triggered manually
-  *after* upgrade to Karaage 1.4. This is because:
+* We can't implement automatic migration of data. Have migration triggered
+  manually *after* upgrade to Karaage 1.4. This is because:
 
   * It is not possible to set ``content_type`` from within migrations, due to
     Django limitations.
   * We cannot automatically generate a ``scheme``, ``allocation_pool`` and
     ``allocation_period`` objects on upgrade that would make sense for all
     installs.
+
+Proposed changes:
+
+* Change ``range_start`` and ``range_end`` to ``Date`` fields.
+* Move the ``content_type`` to the ``ResourcePool`` model.
+
 
 * These attributes should added to the ``unique_together`` attribute.
 
@@ -894,8 +895,47 @@ Gerrit change:
 
 CPUJob model
 ~~~~~~~~~~~~
-Once the `Usage model`_ is finalized, the fields in the ``CPUJob`` model
-may need to be revised. Do we de-normalize the fields?
+Do we need to de-normalize the fields in CPUJob model. e.g. Add the following
+fields:
+
+.. code-block: python
+
+    @python_2_unicode_compatible
+    class CPUJob(models.Model):
+
+        ...
+
+        person_institute = models.ForeignKey(
+            'karaage.Institute',
+            related_name='person_institute_cpujob',
+            null=True,  # legacy data doesn't have person project level
+        )
+        person_career_level = models.ForeignKey(
+            'karaage.CareerLevel',
+            null=True,  # legacy data doesn't have person career level
+        )
+        person_project_level = models.ForeignKey(
+            'karaage.ProjectLevel',
+            null=True,  # legacy data doesn't have person project level
+        )
+        project_institute = models.ForeignKey(
+            'karaage.Institute',
+            related_name='project_institute_cpujob',
+            null=True,  # legacy data doesn't have person project level
+        )
+
+The downside of this change is that the migration to add the extra fields
+is very slow, and this is before we even fill in the fields.
+
+We can't automatically fill in ``person_career_level`` and ``person_project_level``
+on upgrade, as we don't have this data. Should we attempt to fill in
+``person_institute`` and ``project_institute``? We do have this data
+available, however it may not be correct for the time the job  executed.
+
+In theory, after migrating to Karaage4, we can look up this data at any time
+using the django audit logs records. So processing (or reprocess) the usage
+logs at any time (which do not contain this information) and this should
+contain the correct value at the time the job was executed.
 
 
 Example
