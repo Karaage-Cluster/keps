@@ -885,6 +885,9 @@ groups directly instead of via the appropriate interface for the parent.
 While these are required changes, work needs to be done to see if the same
 results can be achieved without duplication of the data in the database.
 
+Having said that, this solution might still be the best solution
+due to it it being faster to lookup the parent object.
+
 Gerrit change:
 
 * `1498 <https://code.vpac.org/gerrit/#/c/1498/>`_
