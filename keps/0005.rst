@@ -994,7 +994,7 @@ do that:
 
 * ``AllocationPool`` { name: "Q1PD", id: 2, project: ProjectD, period: 2100Q1, pool: CPU Hours }
 
-   * ``Allocation`` { grant: 2, allocation_pool: 2, quantity: 10 }
+  * ``Allocation`` { grant: 2, allocation_pool: 2, quantity: 10 }
 
 Elliott decided to match these grants:
 
