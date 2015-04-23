@@ -900,7 +900,7 @@ CPUJob model
 Do we need to de-normalize the fields in CPUJob model. e.g. Add the following
 fields:
 
-.. code-block: python
+.. code-block:: python
 
     @python_2_unicode_compatible
     class CPUJob(models.Model):
