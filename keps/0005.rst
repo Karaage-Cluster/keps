@@ -128,7 +128,7 @@ CareerLevel model
 
     @python_2_unicode_compatible
     class CareerLevel(models.Model):
-        level = models.CharField(max_length=255)
+        level = models.CharField(max_length=255, unique=True)
 
         audit_log = AuditLog()
 
@@ -151,10 +151,6 @@ CareerLevel model
 
 The ``CareerLevel`` table is used to specify the job title of the Person.
 
-Proposed changes:
-
-* Set unique=True on ``level``.
-
 Git commits:
 
 * `5558119d155de9e3629c6940adb84f25c9920aac <https://github.com/Karaage-Cluster/karaage/commit/5558119d155de9e3629c6940adb84f25c9920aac>`_
@@ -166,7 +162,7 @@ ProjectLevel model
 
     @python_2_unicode_compatible
     class ProjectLevel(models.Model):
-        level = models.CharField(max_length=255)
+        level = models.CharField(max_length=255, unique=True)
 
         audit_log = AuditLog()
 
@@ -179,10 +175,6 @@ ProjectLevel model
 
 The ``ProjectLevel`` table is required to indicate a ``Persons`` level within a
 ``Project``.
-
-Proposed changes:
-
-* Set unique=True on ``level``.
 
 Git commits:
 
@@ -522,21 +514,15 @@ AllocationPool model
                 'project__name',
             ]
             app_label = 'karaage'
+            unique_together = (
+                'project',
+                'period',
+                'resource_pool',
+            )
 
 The ``AllocationPool`` defines a ledger containing ``Allocations`` and
 ``Usage`` entries for a particular ``ResourcePool`` and provides methods for
 working out totals.
-
-Proposed changes:
-
-* Set ``unique_together`` to:
-
-  * ``project``
-  * ``period``
-  * ``resource_pool``
-
-  i.e. is it an acceptable constraint that there is only one ``AllocationPool``
-  for every ``Project`` for a given ``AllocationPeriod`` and ``ResourcePool``.
 
 Git commits:
 
@@ -579,7 +565,7 @@ AllocationPeriod model
 .. code-block:: python
 
     class AllocationPeriod(models.Model):
-        name = models.CharField(max_length=255)
+        name = models.CharField(max_length=255, unique=True)
         start = models.DateTimeField()
         end = models.DateTimeField()
 
@@ -597,10 +583,6 @@ AllocationPeriod model
 
 
 Defines a period between two dates.
-
-Proposed change:
-
-* Name should have unique=True set.
 
 Git commits:
 
