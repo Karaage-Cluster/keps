@@ -338,14 +338,6 @@ Notes:
   disk space used at any one time. There should perhaps be an extra field added
   to distinguish the two different cases.
 
-Proposed changes:
-
-* Add ``resource-units`` field. This can be, ``megabytes`` and ``CPU Hours``.
-  More units can be added later.
-* Add ``resource_function`` field. This can be set to ``average``, ``minimum``,
-  ``maximum``, ``last``, and ``sum``. For example with disk space it would be
-  ``maximum`` and for cpu usage it would be ``sum``.
-
 Git commits:
 
 * `0173243e1c0b7b8fccf44444b429a56b0c6825d8 <https://github.com/Karaage-Cluster/karaage/commit/0173243e1c0b7b8fccf44444b429a56b0c6825d8>`_
@@ -744,8 +736,6 @@ Proposed changes:
   * ``project_institute``
 
   As these values could change within the same day.
-
-* Remove the ``description`` field.
 
 Future work:
 
