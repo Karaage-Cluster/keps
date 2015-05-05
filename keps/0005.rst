@@ -388,6 +388,11 @@ Resource model
            ordering = ['machine']
            app_label = 'karaage'
 
+           unique_together = (
+               'resource_pool',
+               'resource_name',
+               'machine',
+           )
 
 The ``Resource`` model defines how we track a ``ResourcePool`` for a given
 ``Machine``.
@@ -401,11 +406,6 @@ Notes:
 Proposed changes:
 
 * Quantity can be NULL.
-* These attributes should be part of the ``unique_together`` attribute.
-
-  * ``resource_pool``
-  * ``resource_name``
-  * ``machine``
 
 Git commits:
 
