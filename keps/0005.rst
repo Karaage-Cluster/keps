@@ -742,7 +742,6 @@ Notes:
 
 Proposed changes:
 
-* Change ``range_start`` and ``range_end`` to ``Date`` fields.
 * Move the ``content_type`` to the ``ResourcePool`` model.
 
 * These attributes should be added to the ``unique_together`` attribute.
