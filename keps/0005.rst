@@ -310,6 +310,9 @@ ResourcePool model
     class ResourcePool(models.Model):
         name = models.CharField(max_length=255, unique=True)
         content_type = models.ForeignKey('contenttypes.ContentType')
+        description = models.CharField(max_length=255)
+        resource_function = models.CharField(max_length=10)
+        resource_units = models.CharField(max_length=10)
 
         audit_log = AuditLog()
 
