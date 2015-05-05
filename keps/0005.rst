@@ -309,6 +309,7 @@ ResourcePool model
 
     class ResourcePool(models.Model):
         name = models.CharField(max_length=255, unique=True)
+        content_type = models.ForeignKey('contenttypes.ContentType')
 
         audit_log = AuditLog()
 
@@ -651,7 +652,6 @@ Usage model
         allocation_pool = models.ForeignKey('karaage.AllocationPool', null=True)
         allocation_period = models.ForeignKey(
             'karaage.AllocationPeriod', null=True)
-        content_type = models.ForeignKey('contenttypes.ContentType')
         grant = models.ForeignKey('karaage.Grant', null=True)
         person_institute = models.ForeignKey(
             'karaage.Institute',
@@ -741,8 +741,6 @@ Notes:
     installs.
 
 Proposed changes:
-
-* Move the ``content_type`` to the ``ResourcePool`` model.
 
 * These attributes should be added to the ``unique_together`` attribute.
 
