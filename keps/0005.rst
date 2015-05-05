@@ -683,8 +683,10 @@ Usage model
             app_label = 'karaage'
             unique_together = (
                 'range_start', 'range_end',
-                'account', 'machine', 'submitted_project')
-
+                'account', 'machine', 'submitted_project',
+                'person_institute', 'person_career_level',
+                'person_project_level', 'project_institute',
+            )
 
 The aggregated ``Usage`` model is designed to speed up access to usage
 information by aggregating it into one table, as well as make it independent of
@@ -725,17 +727,6 @@ Notes:
   * We cannot automatically generate a ``scheme``, ``allocation_pool`` and
     ``allocation_period`` objects on upgrade that would make sense for all
     installs.
-
-Proposed changes:
-
-* These attributes should be added to the ``unique_together`` attribute.
-
-  * ``person_project_level``
-  * ``person_career_level``
-  * ``person_institute``
-  * ``project_institute``
-
-  As these values could change within the same day.
 
 Future work:
 
