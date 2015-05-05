@@ -648,7 +648,6 @@ Usage model
         allocation_pool = models.ForeignKey('karaage.AllocationPool', null=True)
         allocation_period = models.ForeignKey(
             'karaage.AllocationPeriod', null=True)
-        grant = models.ForeignKey('karaage.Grant', null=True)
         person_institute = models.ForeignKey(
             'karaage.Institute',
             related_name='person_usage',
@@ -671,7 +670,6 @@ Usage model
         )
         resource = models.ForeignKey('karaage.Resource')
         resource_pool = models.ForeignKey('karaage.ResourcePool', null=True)
-        scheme = models.ForeignKey('karaage.Scheme', null=True)
         person_project_level = models.ForeignKey(
             'karaage.ProjectLevel',
             blank=True, null=True,  # legacy data doesn't have person project level
@@ -746,12 +744,6 @@ Proposed changes:
   * ``project_institute``
 
   As these values could change within the same day.
-
-* Remove ``scheme`` field should get removed. Recording the ``scheme`` here
-  makes no sense. An ``AllocationPool`` can have multiple ``Allocations``.
-  Which ``Allocations`` were used for this record?  Each ``Allocation`` has a
-  different ``Grant``.  Each ``Grant`` can have a different ``Scheme``. We can
-  only record one ``scheme`` however.
 
 * Remove the ``description`` field.
 
