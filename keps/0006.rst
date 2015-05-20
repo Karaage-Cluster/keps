@@ -1,0 +1,95 @@
+KEP 6: Remove Django-Audit-Log
+==============================
+
+:Created: 2015-05-15
+:Author: Brian May
+:Status: Draft
+
+Looks like django-audit-log is a growing concern, so I just wanted to
+document some background as to the problems VLSCI faced in Karaage 2,
+and how django-audit-log was to address these issues, the problems
+with django-audit-log, and a possible solution.
+
+The root problem is that a person's institute can change, and there is
+no way to identify what the person's institute was at the time they ran
+jobs. So it is not easy to assign the usage to the correct institute.
+
+A similar problem is with project's institutes. Although it is possible
+that project's institute could be a read only value, and if the
+institute does change the requirement is that a new project is created
+as opposed to updating the existing project.
+
+Karaage4 introduces new fields for person level and project membership
+level that will have similar problems.
+
+The current version of Karaage4 partly solves this issue by recording the
+person's institute in every record in the cpujobs table, which can then
+be copied to the new aggregated usage table.
+
+However, it does not solve the problem on how to populate the cpujobs
+table. The log file we import into cpujobs only has the username and the
+project name, it does not have the institutes. Similarly, the log file
+may not get imported immediately, it could get imported at any time. By
+the time it is imported, the institute's may have changed.
+
+Also another issue: what happens if the institute gets changed while a
+job is being executed? Which institute do we assign? The one when
+the job was submitted, the one when the job was executed, or the one
+when the job finishes?
+
+django-audit-log was chosen by the Common Code team. Ideally it's use
+would mean that we would be able to lookup what the person's institute
+was at a particular point in time, thus we can look up the value at the
+point in time when the job was run, and use this to populate the cpujobs
+table.
+
+django-audit-log was chosen because it stores its data in another table,
+with the same fields as the original table. This is flexible because it
+allows migrations to be run on the audit log table, and it makes it
+possible to conduct queries like "name all people who ever have been
+part of the X institute."
+
+Unfortunately, django-audit-log has a growing list of serious bugs that
+prevent Karaage4 from working properly as required. There is no response
+to these bug reports from the author of django-audit-log, and it is
+starting to look like django-audit-log has been abandoned. It is
+completely broken under Django 1.8, and Django 1.8 is a LTS release.
+
+See bugs at: https://github.com/Atomidata/django-audit-log/issues
+
+Looking at https://www.djangopackages.com/grids/g/model-audit/, I see
+that django-reversion is a lot more popular. Unlike django-audit-log, it
+creates two tables that store all revisions. Each revision stores a list
+of attributes in a json formatted field, serialized_data.
+
+This means that migrating changes to the schema would become slow and
+inefficient, because every row has to be updated one at a time. However,
+maybe we shouldn't be migrating old data anyway, because migrations
+could introduce errors in old data that don't get detected until after
+we have lost the original data. A better method might be to apply to
+migration at the time we read the data. If we get this wrong, we can
+change the code and no data is lost.
+
+Another disadvantage is that you will not be able to do queries based on
+old data. i.e. asking "what was $person's institute on $data?" would be
+ok, but "what people have ever been a member of $institute" would be
+slow and (if I understand correctly) require searching every record.
+
+If we go back to the original requirements, however, this advance type
+of query is not required. In fact, the only historic data we really need
+to record is the institute for every person, the institute for every
+project, the person level and the project membership level. If we ever
+remove institutes this would change, however, it might be rather risky
+automatically migrating the old data anyway.
+
+We need to work this out now, because once there is data in the system
+it will become a lot harder to migrate to another system.
+
+Anyway, that is just my understanding of the problem.
+
+Any thoughts or comments?
+
+(Any mistakes in the above are Tux' fault.)
+
+Disclaimer: I haven't used reversion yet, so going based on some of the
+claims made by the documentation.

@@ -16,3 +16,4 @@ Draft:
 * `[0003] <keps/0003.rst>`_: Authorization
 * `[0004] <keps/0004.rst>`_: Usage Information
 * `[0005] <keps/0005.rst>`_: Karaage 4
+* `[0006] <keps/0006.rst>`_: Remove Django-Audit-Log
